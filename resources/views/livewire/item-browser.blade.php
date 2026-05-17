@@ -150,6 +150,12 @@
     </div>
 
     {{-- ── Table ── --}}
+    @php
+        $si      = fn(string $col) => $sortColumn === $col ? ($sortDirection === 'asc' ? '▲' : '▼') : '⇅';
+        $thA     = 'color:#ccd4f0;';
+        $thB     = 'color:#3a4870;';
+        $thClass = 'cursor-pointer select-none';
+    @endphp
     <div class="ff-box overflow-hidden">
         <div class="overflow-x-auto">
             @if($tab === 'craft')
@@ -157,10 +163,31 @@
                 <thead>
                     <tr>
                         <th class="text-left w-8"></th>
-                        <th class="text-left">Item</th>
+                        <th class="text-left {{ $thClass }}"
+                            wire:click="sortBy('name')"
+                            style="{{ $sortColumn === 'name' ? $thA : $thB }}">
+                            <span class="inline-flex items-center gap-1">
+                                Item
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'name' ? '1' : '0.35' }};">{{ $si('name') }}</span>
+                            </span>
+                        </th>
                         <th class="text-left">Classes</th>
-                        <th class="text-center">Nível</th>
-                        <th class="text-center">Stars</th>
+                        <th class="text-center {{ $thClass }}"
+                            wire:click="sortBy('level')"
+                            style="{{ $sortColumn === 'level' ? $thA : $thB }}">
+                            <span class="inline-flex items-center justify-center gap-1">
+                                Nível
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'level' ? '1' : '0.35' }};">{{ $si('level') }}</span>
+                            </span>
+                        </th>
+                        <th class="text-center {{ $thClass }}"
+                            wire:click="sortBy('stars')"
+                            style="{{ $sortColumn === 'stars' ? $thA : $thB }}">
+                            <span class="inline-flex items-center justify-center gap-1">
+                                Stars
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'stars' ? '1' : '0.35' }};">{{ $si('stars') }}</span>
+                            </span>
+                        </th>
                         <th class="text-center">Yield</th>
                         @if($serverId)
                             <th class="text-right">Preço mín. NQ</th>
@@ -264,10 +291,31 @@
                 <thead>
                     <tr>
                         <th class="text-left w-8"></th>
-                        <th class="text-left">Item</th>
+                        <th class="text-left {{ $thClass }}"
+                            wire:click="sortBy('name')"
+                            style="{{ $sortColumn === 'name' ? $thA : $thB }}">
+                            <span class="inline-flex items-center gap-1">
+                                Item
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'name' ? '1' : '0.35' }};">{{ $si('name') }}</span>
+                            </span>
+                        </th>
                         <th class="text-center">Fonte</th>
-                        <th class="text-center">Nível</th>
-                        <th class="text-center">Stars</th>
+                        <th class="text-center {{ $thClass }}"
+                            wire:click="sortBy('level')"
+                            style="{{ $sortColumn === 'level' ? $thA : $thB }}">
+                            <span class="inline-flex items-center justify-center gap-1">
+                                Nível
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'level' ? '1' : '0.35' }};">{{ $si('level') }}</span>
+                            </span>
+                        </th>
+                        <th class="text-center {{ $thClass }}"
+                            wire:click="sortBy('stars')"
+                            style="{{ $sortColumn === 'stars' ? $thA : $thB }}">
+                            <span class="inline-flex items-center justify-center gap-1">
+                                Stars
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'stars' ? '1' : '0.35' }};">{{ $si('stars') }}</span>
+                            </span>
+                        </th>
                         @if($serverId)
                             <th class="text-right">Preço mín. NQ</th>
                             <th class="text-right">Mediana NQ</th>

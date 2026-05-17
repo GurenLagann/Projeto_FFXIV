@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Recipe extends Model
 {
-    protected $fillable = ['item_id', 'job_id', 'craft_level', 'yields', 'can_be_hq', 'stars'];
+    protected $fillable = ['item_id', 'job_id', 'craft_level', 'yields', 'can_be_hq', 'stars', 'difficulty'];
 
     protected $casts = [
         'craft_level' => 'integer',
         'yields'      => 'integer',
         'stars'       => 'integer',
         'can_be_hq'   => 'boolean',
+        'difficulty'  => 'integer',
     ];
 
     public function item(): BelongsTo

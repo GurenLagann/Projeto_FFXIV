@@ -13,24 +13,28 @@ class ItemBrowser extends Component
 {
     use WithPagination;
 
-    public string  $tab      = 'craft';
-    public string  $search   = '';
-    public ?int    $serverId = null;
-    public ?int    $jobId    = null;
-    public ?string $source   = null;   // 'gathering' | 'fishing'
-    public ?int    $minLevel = null;
-    public ?int    $maxLevel = null;
-    public ?int    $stars    = null;   // null = all, -1 = no stars, 1-3 = stars
+    public string  $tab           = 'craft';
+    public string  $search        = '';
+    public ?int    $serverId      = null;
+    public ?int    $jobId         = null;
+    public ?string $source        = null;   // 'gathering' | 'fishing'
+    public ?int    $minLevel      = null;
+    public ?int    $maxLevel      = null;
+    public ?int    $stars         = null;   // null = all, -1 = no stars, 1-3 = stars
+    public string  $sortColumn    = 'name';
+    public string  $sortDirection = 'asc';
 
     protected $queryString = [
-        'tab'      => ['except' => 'craft'],
-        'search'   => ['except' => ''],
-        'serverId' => ['except' => null],
-        'jobId'    => ['except' => null],
-        'source'   => ['except' => null],
-        'minLevel' => ['except' => null],
-        'maxLevel' => ['except' => null],
-        'stars'    => ['except' => null],
+        'tab'           => ['except' => 'craft'],
+        'search'        => ['except' => ''],
+        'serverId'      => ['except' => null],
+        'jobId'         => ['except' => null],
+        'source'        => ['except' => null],
+        'minLevel'      => ['except' => null],
+        'maxLevel'      => ['except' => null],
+        'stars'         => ['except' => null],
+        'sortColumn'    => ['except' => 'name'],
+        'sortDirection' => ['except' => 'asc'],
     ];
 
     public function updatingSearch(): void   { $this->resetPage(); }
@@ -43,11 +47,28 @@ class ItemBrowser extends Component
 
     public function setTab(string $tab): void
     {
-        $this->tab    = $tab;
-        $this->jobId  = null;
-        $this->source = null;
-        $this->stars  = null;
-        $this->search = '';
+        $this->tab           = $tab;
+        $this->jobId         = null;
+        $this->source        = null;
+        $this->stars         = null;
+        $this->search        = '';
+        $this->sortColumn    = 'name';
+        $this->sortDirection = 'asc';
+        $this->resetPage();
+    }
+
+    public function sortBy(string $column): void
+    {
+        $allowed = ['name', 'level', 'stars'];
+        if (!in_array($column, $allowed, true)) {
+            return;
+        }
+        if ($this->sortColumn === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortColumn    = $column;
+            $this->sortDirection = $column === 'name' ? 'asc' : 'desc';
+        }
         $this->resetPage();
     }
 
@@ -85,10 +106,12 @@ class ItemBrowser extends Component
         }
 
         return view('livewire.item-browser', [
-            'items'   => $items,
-            'prices'  => $prices,
-            'servers' => Server::active()->orderBy('region')->orderBy('name')->get(['id', 'name', 'region']),
-            'jobs'    => collect(Job::cases())->filter(fn($j) => $j !== Job::OMNICRAFTER)->values(),
+            'items'          => $items,
+            'prices'         => $prices,
+            'servers'        => Server::active()->orderBy('region')->orderBy('name')->get(['id', 'name', 'region']),
+            'jobs'           => collect(Job::cases())->filter(fn($j) => $j !== Job::OMNICRAFTER)->values(),
+            'sortColumn'     => $this->sortColumn,
+            'sortDirection'  => $this->sortDirection,
         ]);
     }
 
@@ -132,7 +155,19 @@ class ItemBrowser extends Component
             $query->whereHas('recipe', fn($q) => $q->where('stars', $starsValue));
         }
 
-        return $query->orderBy('name');
+        if ($this->sortColumn === 'level') {
+            $query->orderByRaw(
+                '(SELECT MIN(craft_level) FROM recipes WHERE recipes.item_id = items.id) ' . strtoupper($this->sortDirection)
+            )->orderBy('items.name');
+        } elseif ($this->sortColumn === 'stars') {
+            $query->orderByRaw(
+                '(SELECT MAX(stars) FROM recipes WHERE recipes.item_id = items.id) ' . strtoupper($this->sortDirection)
+            )->orderBy('items.name');
+        } else {
+            $query->orderBy('name', $this->sortDirection);
+        }
+
+        return $query;
     }
 
     private function gatheringQuery()
@@ -163,7 +198,19 @@ class ItemBrowser extends Component
             $query->whereHas('gatheringItem', fn($q) => $q->where('stars', $starsValue));
         }
 
-        return $query->orderBy('name');
+        if ($this->sortColumn === 'level') {
+            $query->orderByRaw(
+                '(SELECT MIN(gathering_level) FROM gathering_items WHERE gathering_items.item_id = items.id) ' . strtoupper($this->sortDirection)
+            )->orderBy('items.name');
+        } elseif ($this->sortColumn === 'stars') {
+            $query->orderByRaw(
+                '(SELECT MAX(stars) FROM gathering_items WHERE gathering_items.item_id = items.id) ' . strtoupper($this->sortDirection)
+            )->orderBy('items.name');
+        } else {
+            $query->orderBy('name', $this->sortDirection);
+        }
+
+        return $query;
     }
 
     private function jobColumn(int $jobId): ?string

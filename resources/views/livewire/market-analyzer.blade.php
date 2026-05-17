@@ -374,15 +374,64 @@
 
         <div class="overflow-x-auto">
             <table class="ff-table w-full" aria-label="Resultados de análise de mercado">
+                @php
+                    $sortIcon = fn(string $col) => $sortColumn === $col
+                        ? ($sortDirection === 'asc' ? '▲' : '▼')
+                        : '⇅';
+                    $thActive = 'color:#ccd4f0;';
+                    $thBase   = 'color:#3a4870;';
+                @endphp
                 <thead>
                     <tr>
-                        <th scope="col" class="text-left">Item</th>
+                        <th scope="col" class="text-left cursor-pointer select-none"
+                            wire:click="sortBy('itemName')"
+                            style="{{ $sortColumn === 'itemName' ? $thActive : $thBase }}">
+                            <span class="inline-flex items-center gap-1">
+                                Item
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'itemName' ? '1' : '0.35' }};">{{ $sortIcon('itemName') }}</span>
+                            </span>
+                        </th>
                         <th scope="col" class="text-left hidden lg:table-cell" style="width:5rem;">Jobs</th>
-                        <th scope="col" class="text-right">Lucro</th>
-                        <th scope="col" class="text-right hidden md:table-cell">Custo</th>
-                        <th scope="col" class="text-right hidden md:table-cell">Receita</th>
-                        <th scope="col" class="text-right">Margem</th>
-                        <th scope="col" class="text-right hidden sm:table-cell">Vnd/Sem</th>
+                        <th scope="col" class="text-right cursor-pointer select-none"
+                            wire:click="sortBy('profit')"
+                            style="{{ $sortColumn === 'profit' ? $thActive : $thBase }}">
+                            <span class="inline-flex items-center justify-end gap-1">
+                                Lucro
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'profit' ? '1' : '0.35' }};">{{ $sortIcon('profit') }}</span>
+                            </span>
+                        </th>
+                        <th scope="col" class="text-right hidden md:table-cell cursor-pointer select-none"
+                            wire:click="sortBy('costEstimate')"
+                            style="{{ $sortColumn === 'costEstimate' ? $thActive : $thBase }}">
+                            <span class="inline-flex items-center justify-end gap-1">
+                                Custo
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'costEstimate' ? '1' : '0.35' }};">{{ $sortIcon('costEstimate') }}</span>
+                            </span>
+                        </th>
+                        <th scope="col" class="text-right hidden md:table-cell cursor-pointer select-none"
+                            wire:click="sortBy('revenueEstimate')"
+                            style="{{ $sortColumn === 'revenueEstimate' ? $thActive : $thBase }}">
+                            <span class="inline-flex items-center justify-end gap-1">
+                                Receita
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'revenueEstimate' ? '1' : '0.35' }};">{{ $sortIcon('revenueEstimate') }}</span>
+                            </span>
+                        </th>
+                        <th scope="col" class="text-right cursor-pointer select-none"
+                            wire:click="sortBy('marginPercent')"
+                            style="{{ $sortColumn === 'marginPercent' ? $thActive : $thBase }}">
+                            <span class="inline-flex items-center justify-end gap-1">
+                                Margem
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'marginPercent' ? '1' : '0.35' }};">{{ $sortIcon('marginPercent') }}</span>
+                            </span>
+                        </th>
+                        <th scope="col" class="text-right hidden sm:table-cell cursor-pointer select-none"
+                            wire:click="sortBy('salesPerWeek')"
+                            style="{{ $sortColumn === 'salesPerWeek' ? $thActive : $thBase }}">
+                            <span class="inline-flex items-center justify-end gap-1">
+                                Vnd/Sem
+                                <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'salesPerWeek' ? '1' : '0.35' }};">{{ $sortIcon('salesPerWeek') }}</span>
+                            </span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>

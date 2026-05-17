@@ -47,57 +47,51 @@ class MarketAnalyzerService
             $query->where('stars', $filters['stars']);
         }
 
-        $recipes = $query->get();
-
-        if ($recipes->isEmpty()) {
-            return [];
-        }
-
-        $itemIds = $recipes->pluck('item_id')->unique()->values()->all();
-        $materialIds = $recipes->flatMap(fn($r) => $r->materials->pluck('id'))->unique()->values()->all();
-        $allIds = array_unique(array_merge($itemIds, $materialIds));
-
-        $prices = $this->universalis->getPrices($server, $allIds);
-
+        $limit   = (int) ($filters['limit'] ?? config('market.analysis.max_results', 1000));
         $results = [];
 
-        foreach ($recipes as $recipe) {
-            $finalPrice = $prices[$recipe->item_id] ?? null;
-            if (!$finalPrice) {
-                continue;
-            }
+        $query->chunk(300, function ($recipes) use (
+            $server, $filters, $costMetric, $revenueMetric, &$results
+        ) {
+            $itemIds     = $recipes->pluck('item_id')->unique()->values()->all();
+            $materialIds = $recipes->flatMap(fn($r) => $r->materials->pluck('id'))->unique()->values()->all();
+            $allIds      = array_unique(array_merge($itemIds, $materialIds));
 
-            $materialPrices = [];
-            foreach ($recipe->materials as $material) {
-                if (isset($prices[$material->id])) {
-                    $materialPrices[$material->id] = $prices[$material->id];
+            $prices = $this->universalis->getPrices($server, $allIds);
+
+            foreach ($recipes as $recipe) {
+                $finalPrice = $prices[$recipe->item_id] ?? null;
+                if (!$finalPrice) {
+                    continue;
                 }
+
+                $materialPrices = [];
+                foreach ($recipe->materials as $material) {
+                    if (isset($prices[$material->id])) {
+                        $materialPrices[$material->id] = $prices[$material->id];
+                    }
+                }
+
+                $result = $this->calculator->calculate($recipe, $materialPrices, $finalPrice, $costMetric, $revenueMetric);
+
+                if (!empty($filters['min_profit']) && $result->profit < $filters['min_profit']) {
+                    continue;
+                }
+                if (!empty($filters['min_margin']) && $result->marginPercent < $filters['min_margin']) {
+                    continue;
+                }
+                if (!empty($filters['min_sales']) && $result->salesPerWeek < $filters['min_sales']) {
+                    continue;
+                }
+                if (!empty($filters['gatherable_only']) && !$result->allMatsGatherable) {
+                    continue;
+                }
+
+                $results[] = $result;
             }
-
-            $result = $this->calculator->calculate($recipe, $materialPrices, $finalPrice, $costMetric, $revenueMetric);
-
-            if (!empty($filters['min_profit']) && $result->profit < $filters['min_profit']) {
-                continue;
-            }
-
-            if (!empty($filters['min_margin']) && $result->marginPercent < $filters['min_margin']) {
-                continue;
-            }
-
-            if (!empty($filters['min_sales']) && $result->salesPerWeek < $filters['min_sales']) {
-                continue;
-            }
-
-            if (!empty($filters['gatherable_only']) && !$result->allMatsGatherable) {
-                continue;
-            }
-
-            $results[] = $result;
-        }
+        });
 
         usort($results, fn(ProfitResult $a, ProfitResult $b) => $b->profit <=> $a->profit);
-
-        $limit = (int) ($filters['limit'] ?? config('market.analysis.max_results', 1000));
 
         return array_slice($results, 0, $limit);
     }

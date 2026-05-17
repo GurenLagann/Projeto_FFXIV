@@ -393,6 +393,11 @@
                     Itens
                 </a>
 
+                <a href="{{ route('craft.index') }}"
+                   class="nav-lnk {{ request()->routeIs('craft.*') ? 'active' : '' }}">
+                    Craft
+                </a>
+
                 <a href="{{ route('market.history') }}"
                    class="nav-lnk {{ request()->routeIs('market.history') ? 'active' : '' }}">
                     Histórico

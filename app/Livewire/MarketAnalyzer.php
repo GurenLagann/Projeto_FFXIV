@@ -28,9 +28,11 @@ class MarketAnalyzer extends Component
     public bool    $analyzed = false;
     public ?string $error    = null;
 
-    public int $currentPage = 1;
-    public int $perPage     = 20;
-    public int $totalResults = 0;
+    public int    $currentPage   = 1;
+    public int    $perPage       = 20;
+    public int    $totalResults  = 0;
+    public string $sortColumn    = 'profit';
+    public string $sortDirection = 'desc';
 
     // Character — populated once at mount, stable for the session
     public bool    $characterVerified  = false;
@@ -126,12 +128,41 @@ class MarketAnalyzer extends Component
 
     public function getPagedResultsProperty(): LengthAwarePaginator
     {
+        $sorted = $this->results;
+
+        usort($sorted, function (array $a, array $b) {
+            $va = $a[$this->sortColumn] ?? '';
+            $vb = $b[$this->sortColumn] ?? '';
+
+            $cmp = is_string($va)
+                ? strcmp($va, $vb)
+                : ($va <=> $vb);
+
+            return $this->sortDirection === 'asc' ? $cmp : -$cmp;
+        });
+
         return new LengthAwarePaginator(
-            array_slice($this->results, ($this->currentPage - 1) * $this->perPage, $this->perPage),
-            count($this->results),
+            array_slice($sorted, ($this->currentPage - 1) * $this->perPage, $this->perPage),
+            count($sorted),
             $this->perPage,
             $this->currentPage,
         );
+    }
+
+    public function sortBy(string $column): void
+    {
+        $allowed = ['itemName', 'profit', 'costEstimate', 'revenueEstimate', 'marginPercent', 'salesPerWeek'];
+        if (!in_array($column, $allowed, true)) {
+            return;
+        }
+
+        if ($this->sortColumn === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortColumn    = $column;
+            $this->sortDirection = 'desc';
+        }
+        $this->currentPage = 1;
     }
 
     public function nextPage(): void
@@ -151,11 +182,13 @@ class MarketAnalyzer extends Component
     public function render()
     {
         return view('livewire.market-analyzer', [
-            'servers'      => Server::active()->orderBy('region')->orderBy('name')->get(),
-            'jobs'         => Job::cases(),
-            'costMetrics'  => CostMetric::cases(),
-            'revMetrics'   => RevenueMetric::cases(),
-            'pagedResults' => $this->pagedResults,
+            'servers'        => Server::active()->orderBy('region')->orderBy('name')->get(),
+            'jobs'           => Job::cases(),
+            'costMetrics'    => CostMetric::cases(),
+            'revMetrics'     => RevenueMetric::cases(),
+            'pagedResults'   => $this->pagedResults,
+            'sortColumn'     => $this->sortColumn,
+            'sortDirection'  => $this->sortDirection,
         ]);
     }
 }

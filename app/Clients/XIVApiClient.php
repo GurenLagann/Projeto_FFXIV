@@ -154,6 +154,7 @@ class XIVApiClient
                 'yields'      => $recipeData['AmountResult'] ?? 1,
                 'can_be_hq'   => (bool) ($recipeData['CanHq'] ?? false),
                 'stars'       => $recipeData['RecipeLevelTable']['Stars'] ?? 0,
+                'difficulty'  => $recipeData['RecipeLevelTable']['Difficulty'] ?? 0,
             ]
         );
 
