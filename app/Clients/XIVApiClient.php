@@ -295,7 +295,7 @@ class XIVApiClient
     public function getGatheringPage(int $after = 0, int $limit = 500): array
     {
         $data = $this->v2Get(
-            "/api/sheet/GatheringItem?fields=Item,GatheringItemLevel.GatheringItemLevel,GatheringItemLevel.Stars,IsHidden&limit={$limit}&after={$after}"
+            "/api/sheet/GatheringItem?fields=Item,GatheringItemLevel.GatheringItemLevel,GatheringItemLevel.Stars&limit={$limit}&after={$after}"
         );
         return $data['rows'] ?? [];
     }
@@ -328,11 +328,12 @@ class XIVApiClient
         $records = [];
 
         foreach ($rows as $row) {
-            $fields  = $row['fields'] ?? [];
-            $itemId  = (string) ($fields['Item']['value'] ?? 0);
-            $isHidden = (bool) ($fields['IsHidden'] ?? false);
+            $fields = $row['fields'] ?? [];
+            $itemId = (string) ($fields['Item']['value'] ?? 0);
 
-            if (!$itemId || $itemId === '0' || $isHidden) {
+            // IsHidden indica nós especiais/timed (ex: Titanium Ore), não que o item
+            // seja incoletável — incluímos esses itens normalmente.
+            if (!$itemId || $itemId === '0') {
                 continue;
             }
 
