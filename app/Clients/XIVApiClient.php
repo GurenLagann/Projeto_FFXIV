@@ -105,6 +105,77 @@ class XIVApiClient
         }
     }
 
+    /**
+     * Retorna todas as receitas (summaries) de um item.
+     * Um item pode ter múltiplas receitas (e.g., versões de diferentes jobs).
+     */
+    public function getRecipesByItemId(int $itemId): array
+    {
+        try {
+            $data = $this->cachedRequest("/recipe?limit=10&filters=ItemResult.ID={$itemId}");
+            return $data['Results'] ?? [];
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Sincroniza dados de coleta (gathering/fishing) apenas para os item_ids fornecidos.
+     * Pagina as sheets até encontrar todos os IDs ou esgotar os dados, evitando o sync total.
+     *
+     * @param  array<int|string> $itemIds
+     */
+    public function syncGatheringForItems(array $itemIds): int
+    {
+        if (empty($itemIds)) {
+            return 0;
+        }
+
+        $needed  = array_flip(array_map('strval', $itemIds));
+        $synced  = 0;
+        $limit   = 500;
+
+        foreach (['gathering', 'fishing'] as $source) {
+            $after     = 0;
+            $remaining = $needed;
+
+            do {
+                try {
+                    $rows = $source === 'gathering'
+                        ? $this->getGatheringPage($after, $limit)
+                        : $this->getFishingPage($after, $limit);
+                } catch (\Throwable) {
+                    break;
+                }
+
+                if (empty($rows)) {
+                    break;
+                }
+
+                // Filtra apenas as linhas relevantes antes de chamar o upsert
+                $relevant = array_filter($rows, function (array $row) use ($remaining) {
+                    $itemId = (string) ($row['fields']['Item']['value'] ?? 0);
+                    return isset($remaining[$itemId]);
+                });
+
+                if (!empty($relevant)) {
+                    $synced += $this->syncGatheringRows(array_values($relevant), $source);
+
+                    // Remove os itens já encontrados para poder parar cedo
+                    foreach ($relevant as $row) {
+                        $itemId = (string) ($row['fields']['Item']['value'] ?? 0);
+                        unset($remaining[$itemId]);
+                    }
+                }
+
+                $after = (int) end($rows)['row_id'];
+
+            } while (count($rows) >= $limit && !empty($remaining));
+        }
+
+        return $synced;
+    }
+
     public function getRecipeById(int $recipeId): ?array
     {
         try {

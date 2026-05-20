@@ -2,10 +2,15 @@
 
 namespace App\Jobs;
 
+use App\Clients\UniversalisClient;
+use App\Enums\CostMetric;
+use App\Enums\RevenueMetric;
+use App\Mail\AlertTriggeredMail;
 use App\Models\Alert;
-use App\Services\MarketAnalyzerService;
+use App\Services\ProfitCalculator;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Mail;
 
 class CheckAlertsJob implements ShouldQueue
 {
@@ -13,22 +18,68 @@ class CheckAlertsJob implements ShouldQueue
 
     public int $tries = 1;
 
-    public function handle(MarketAnalyzerService $service): void
+    // Evita re-notificar o mesmo alerta em menos de 24h
+    private const COOLDOWN_HOURS = 24;
+
+    public function handle(UniversalisClient $universalis, ProfitCalculator $calculator): void
     {
         $alerts = Alert::where('is_active', true)
-            ->with(['item', 'user', 'server'])
+            ->where(function ($q) {
+                $q->whereNull('last_notified_at')
+                  ->orWhere('last_notified_at', '<', now()->subHours(self::COOLDOWN_HOURS));
+            })
+            ->with([
+                'user',
+                'server',
+                'item.recipes.materials.gatheringItem',
+                'item.recipes.item.recipeLookup',
+            ])
             ->get();
 
-        foreach ($alerts as $alert) {
-            $prices = $service->getCurrentPrices($alert->server->slug, [$alert->item_id]);
-            $price  = $prices[$alert->item_id] ?? null;
+        // Agrupa por servidor para fazer uma única chamada à API por servidor
+        $byServer = $alerts->groupBy(fn(Alert $a) => $a->server->slug);
 
-            if (!$price) {
-                continue;
-            }
+        foreach ($byServer as $serverSlug => $serverAlerts) {
+            $itemIds = $serverAlerts->flatMap(function (Alert $alert) {
+                $recipe = $alert->item->recipes->first();
+                if (!$recipe) {
+                    return [$alert->item_id];
+                }
+                return array_merge([$alert->item_id], $recipe->materials->pluck('id')->all());
+            })->unique()->values()->all();
 
-            if ($price->minPriceNQ > 0 && $price->minPriceNQ <= $alert->min_profit) {
-                $alert->update(['last_notified_at' => now()]);
+            $prices = $universalis->getPrices($serverSlug, $itemIds);
+
+            foreach ($serverAlerts as $alert) {
+                $recipe = $alert->item->recipes->first();
+                if (!$recipe) {
+                    continue;
+                }
+
+                $finalPrice = $prices[$alert->item_id] ?? null;
+                if (!$finalPrice) {
+                    continue;
+                }
+
+                $materialPrices = [];
+                foreach ($recipe->materials as $material) {
+                    if (isset($prices[$material->id])) {
+                        $materialPrices[$material->id] = $prices[$material->id];
+                    }
+                }
+
+                $result = $calculator->calculate(
+                    $recipe,
+                    $materialPrices,
+                    $finalPrice,
+                    CostMetric::MIN_LISTING,
+                    RevenueMetric::HOME_MIN_LISTING,
+                );
+
+                if ($result->profit >= $alert->min_profit && $result->marginPercent >= $alert->min_margin) {
+                    Mail::to($alert->user)->send(new AlertTriggeredMail($alert, $result));
+                    $alert->update(['last_notified_at' => now()]);
+                }
             }
         }
     }
