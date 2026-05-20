@@ -21,6 +21,11 @@ class CheckAlertsJob implements ShouldQueue
     // Evita re-notificar o mesmo alerta em menos de 24h
     private const COOLDOWN_HOURS = 24;
 
+    public function __construct()
+    {
+        $this->onQueue('default');
+    }
+
     public function handle(UniversalisClient $universalis, ProfitCalculator $calculator): void
     {
         $alerts = Alert::where('is_active', true)
