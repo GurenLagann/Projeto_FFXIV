@@ -6,6 +6,7 @@ use App\Clients\UniversalisClient;
 use App\Enums\Job;
 use App\Models\Item;
 use App\Models\Server;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -88,6 +89,20 @@ class ItemBrowser extends Component
     {
         $this->stars = ($this->stars === $stars) ? null : $stars;
         $this->resetPage();
+    }
+
+    public function refreshPrice(int $itemId): void
+    {
+        if (!$this->serverId) {
+            return;
+        }
+
+        $server = Server::find($this->serverId);
+        if (!$server) {
+            return;
+        }
+
+        Cache::forget("univ:item:{$server->slug}:{$itemId}");
     }
 
     public function render(UniversalisClient $universalis)

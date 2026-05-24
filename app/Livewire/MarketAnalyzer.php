@@ -24,6 +24,10 @@ class MarketAnalyzer extends Component
     public string $costMetric      = 'min_listing';
     public string $revMetric       = 'home_min_listing';
 
+    // Modo de análise: 'craft' | 'gathering' | 'all'
+    public string  $analysisMode     = 'craft';
+    public ?string $gatheringSource  = null;   // null | 'gathering' | 'fishing'
+
     public array   $results  = [];
     public bool    $analyzed = false;
     public ?string $error    = null;
@@ -56,7 +60,7 @@ class MarketAnalyzer extends Component
     // Auto-fill level range whenever the selected job changes (requires verified character)
     public function updatedJobId(): void
     {
-        if (!$this->characterVerified || !$this->jobId) {
+        if (!$this->characterVerified || !$this->jobId || $this->analysisMode === 'gathering') {
             return;
         }
         $level = $this->characterJobLevels[$this->jobId] ?? 0;
@@ -64,6 +68,20 @@ class MarketAnalyzer extends Component
             $this->maxLevel = $level;
             $this->minLevel = max(1, $level - 10);
         }
+    }
+
+    public function setAnalysisMode(string $mode): void
+    {
+        $this->analysisMode = $mode;
+        // Limpa job ao entrar no modo coleta puro
+        if ($mode === 'gathering') {
+            $this->jobId = null;
+        }
+    }
+
+    public function toggleGatheringSource(?string $source): void
+    {
+        $this->gatheringSource = ($this->gatheringSource === $source) ? null : $source;
     }
 
     // Character banner button: set server + level (if job selected)
@@ -98,18 +116,32 @@ class MarketAnalyzer extends Component
             $server = Server::findOrFail($this->serverId);
 
             $filters = array_filter([
-                'cost_metric'     => $this->costMetric,
-                'revenue_metric'  => $this->revMetric,
-                'job_id'          => $this->jobId,
-                'min_level'       => $this->minLevel ?: null,
-                'max_level'       => $this->maxLevel ?: null,
-                'min_profit'      => $this->minProfit,
-                'min_margin'      => $this->minMargin,
-                'min_sales'       => $this->minSales,
-                'gatherable_only' => $this->gatherableOnly ?: null,
+                'cost_metric'      => $this->costMetric,
+                'revenue_metric'   => $this->revMetric,
+                'job_id'           => $this->analysisMode !== 'gathering' ? $this->jobId : null,
+                'min_level'        => $this->minLevel ?: null,
+                'max_level'        => $this->maxLevel ?: null,
+                'min_profit'       => $this->minProfit,
+                'min_margin'       => $this->analysisMode !== 'gathering' ? $this->minMargin : null,
+                'min_sales'        => $this->minSales,
+                'gatherable_only'  => ($this->analysisMode !== 'gathering' && $this->gatherableOnly) ?: null,
+                'gathering_source' => $this->gatheringSource,
             ]);
 
-            $rawResults         = $service->analyze($server->slug, $filters);
+            $rawResults = match ($this->analysisMode) {
+                'gathering' => $service->analyzeGathering($server->slug, $filters),
+                'all'       => array_merge(
+                                   $service->analyze($server->slug, $filters),
+                                   $service->analyzeGathering($server->slug, $filters)
+                               ),
+                default     => $service->analyze($server->slug, $filters),
+            };
+
+            // Modo "all": reordena o merge por lucro
+            if ($this->analysisMode === 'all') {
+                usort($rawResults, fn($a, $b) => $b->profit <=> $a->profit);
+            }
+
             $this->results      = array_map(fn($r) => $r->jsonSerialize(), $rawResults);
             $this->totalResults = count($this->results);
             $this->analyzed     = true;

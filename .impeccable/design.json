@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-24T00:00:00.000Z",
+  "title": "Design System: FFXIV Market Analyzer",
+  "extensions": {
+    "colorMeta": {
+      "void":      { "role": "neutral",   "displayName": "The Void",           "canonical": "oklch(5% 0.02 275)",  "tonalRamp": ["#04040d","#06060f","#09091a","#0d0d22","#12122e","#1a1a42","#252560","#3333a0"] },
+      "surface":   { "role": "neutral",   "displayName": "Deep Space",         "canonical": "oklch(8% 0.03 275)",  "tonalRamp": ["#05050f","#0b0b1e","#10102a","#161636","#1e1e50","#282870","#343490","#4040b0"] },
+      "panel":     { "role": "neutral",   "displayName": "Dark Aether",        "canonical": "oklch(10% 0.03 270)", "tonalRamp": ["#07071a","#0f0f28","#141438","#1a1a50","#222268","#2c2c80","#363698","#4040b0"] },
+      "hover-bg":  { "role": "neutral",   "displayName": "Hover State",        "canonical": "oklch(12% 0.03 270)", "tonalRamp": ["#09091e","#141438","#1a1a50","#202068","#282880","#323298","#3c3cb0","#4646c8"] },
+      "border":    { "role": "neutral",   "displayName": "Arcane Boundary",    "canonical": "oklch(22% 0.08 275)", "tonalRamp": ["#0f0f28","#1a1a40","#252560","#303080","#3c3ca0","#4848c0","#5454d0","#6666e0"] },
+      "indigo-hi": { "role": "secondary", "displayName": "Indigo Highlight",   "canonical": "oklch(38% 0.14 275)", "tonalRamp": ["#1a1a40","#252560","#303080","#4040a0","#5050b8","#6060d0","#7070e0","#8888f0"] },
+      "crystal":   { "role": "primary",   "displayName": "Crystal Resonance",  "canonical": "oklch(65% 0.18 255)", "tonalRamp": ["#1a3080","#2244a8","#3366cc","#4480e8","#5599ff","#6aaeff","#88c0ff","#aad4ff"] },
+      "mako":      { "role": "secondary", "displayName": "Life Stream Green",  "canonical": "oklch(80% 0.22 155)", "tonalRamp": ["#003320","#005535","#008850","#00aa66","#00dd77","#33ee99","#66f0b0","#99f5cc"] },
+      "gil-gold":  { "role": "primary",   "displayName": "Gil Gold",           "canonical": "oklch(85% 0.17 85)",  "tonalRamp": ["#3d2e00","#665000","#998000","#c8a818","#f0c030","#f8d460","#fce890","#fff2c0"] },
+      "materia":   { "role": "tertiary",  "displayName": "Materia Glow",       "canonical": "oklch(62% 0.22 300)", "tonalRamp": ["#2a0a4a","#420e70","#621898","#8228c8","#a855f7","#c07aff","#d4a0ff","#eaccff"] },
+      "fire":      { "role": "tertiary",  "displayName": "Phoenix Fire",       "canonical": "oklch(62% 0.22 32)",  "tonalRamp": ["#3a0a00","#601400","#961e00","#cc3018","#ff5533","#ff7755","#ff9977","#ffbbaa"] },
+      "parchment": { "role": "neutral",   "displayName": "Eorzean Parchment",  "canonical": "oklch(86% 0.04 255)", "tonalRamp": ["#2a304a","#3c4460","#5a6080","#7a84a8","#9aa4c8","#b0bade","#ccd4f0","#e0e6f8"] },
+      "dim":       { "role": "neutral",   "displayName": "Faded Inscription",  "canonical": "oklch(42% 0.06 265)", "tonalRamp": ["#1a1e30","#252a40","#333a55","#4a5470","#606888","#7a84a0","#9aa4c0","#c0c8dc"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display / Brand Title", "purpose": "Primary page title and brand mark only. Uses the ff-title gradient exception." },
+      "heading":  { "displayName": "Heading",  "purpose": "Section headings and panel titles. ff-heading class." },
+      "label":    { "displayName": "Label",    "purpose": "Field labels, column headers, nav links, section markers. ff-label class." },
+      "body":     { "displayName": "Body",     "purpose": "Prose, descriptions, helper text. Invisible voice — max 65–75ch." },
+      "mono":     { "displayName": "Mono",     "purpose": "All numeric values: prices, percentages, IDs, timestamps. ff-num class." }
+    },
+    "shadows": [
+      { "name": "panel-structural",    "value": "inset 0 0 0 1px rgba(37,37,96,0.5), 0 8px 40px rgba(0,0,0,0.7)", "purpose": "ff-box panels. Grounds them in the void without the Material 'lifted card' metaphor." },
+      { "name": "panel-hover",         "value": "inset 0 0 0 1px rgba(64,64,160,0.2), 0 0 20px rgba(64,64,160,0.12)", "purpose": "Interactive panel hover state. Indigo aura marks the panel as clickable." },
+      { "name": "glow-crystal",        "value": "0 0 18px rgba(85,153,255,0.35), 0 0 1px rgba(85,153,255,0.9)", "purpose": "Focus states and active interactive elements." },
+      { "name": "glow-mako",           "value": "0 0 14px rgba(0,221,119,0.4), 0 0 1px rgba(0,221,119,0.8)", "purpose": "Profit indicators and verified/live data states." },
+      { "name": "glow-gold",           "value": "0 0 18px rgba(240,192,48,0.35), 0 0 1px rgba(240,192,48,0.7)", "purpose": "Primary action highlights on hover." }
+    ],
+    "motion": [
+      { "name": "state-transition",    "value": "120ms ease-out", "purpose": "Default for all state changes: color, border, opacity. Short and precise." },
+      { "name": "hover-transition",    "value": "150ms ease-out", "purpose": "Panel hover states. Slightly longer for the spatial glow effect." },
+      { "name": "atb-sweep",           "value": "animation: atb-sweep 1.8s ease-in-out infinite", "purpose": "ATB loading bar fill. The system's signature loading animation." },
+      { "name": "shimmer",             "value": "animation: ff-shimmer 1.6s ease-in-out infinite", "purpose": "Skeleton loading states. Opacity pulse between 0.3 and 0.6." }
+    ],
+    "breakpoints": [
+      { "name": "sm",  "value": "640px",  "note": "Brand text hides; table columns collapse" },
+      { "name": "md",  "value": "768px",  "note": "Secondary table columns appear" },
+      { "name": "lg",  "value": "1024px", "note": "Tertiary table columns appear; full desktop layout" },
+      { "name": "xl",  "value": "1280px", "note": "max-w-7xl container limit" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Confirmed action. Gold border and text signal consequence. Use for the single primary action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">ANALISAR MERCADO</button>",
+      "css": ".ds-btn-primary { font-family: 'Cinzel', Georgia, serif; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; background: linear-gradient(160deg, #141440 0%, #1e1e60 100%); border: 1px solid #f0c030; color: #f0c030; padding: 0.55rem 1.5rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; border-radius: 0; transition: background 120ms ease-out, box-shadow 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out; } .ds-btn-primary:hover:not(:disabled) { background: linear-gradient(160deg, #1e1e60 0%, #28288a 100%); box-shadow: 0 0 22px rgba(240,192,48,0.25); color: #ffe880; border-color: #ffe880; } .ds-btn-primary:focus-visible { outline: 1px solid #5599ff; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action. Used for cancel, empty-state CTAs, and lower-priority actions.",
+      "html": "<button class=\"ds-btn-ghost\">Criar alerta ►</button>",
+      "css": ".ds-btn-ghost { font-family: 'Cinzel', Georgia, serif; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; background: transparent; border: 1px solid #252560; color: #4a5470; padding: 0.45rem 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 0; transition: border-color 120ms ease-out, color 120ms ease-out; } .ds-btn-ghost:hover:not(:disabled) { border-color: #4040a0; color: #5599ff; } .ds-btn-ghost:focus-visible { outline: 1px solid #5599ff; outline-offset: 2px; } .ds-btn-ghost:disabled { opacity: 0.25; cursor: not-allowed; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text input and select. A dark slot cut into the panel. Crystal glow on focus.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Nome do item...\">",
+      "css": ".ds-input { background: rgba(4,4,14,0.95); border: 1px solid #252560; color: #ccd4f0; padding: 0.55rem 0.8rem; font-size: 0.875rem; border-radius: 0; width: 100%; transition: border-color 120ms ease-out, box-shadow 120ms ease-out; font-family: ui-sans-serif, system-ui, sans-serif; } .ds-input:focus { outline: none; border-color: #5599ff; box-shadow: 0 0 0 1px rgba(85,153,255,0.12), inset 0 0 10px rgba(85,153,255,0.04); } .ds-input::placeholder { color: #28304a; }"
+    },
+    {
+      "name": "Panel (ff-box)",
+      "kind": "card",
+      "refersTo": null,
+      "description": "Primary content container. A page in the Chronicle with corner bracket decorations and deep ambient shadow.",
+      "html": "<div class=\"ds-panel\"><div class=\"ds-panel-header\"><span class=\"ds-panel-marker\">◆</span><span class=\"ds-panel-label\">FILTROS DE ANÁLISE</span></div><div class=\"ds-panel-body\">Content goes here.</div></div>",
+      "css": ".ds-panel { background: rgba(9,9,24,0.97); border: 1px solid #252560; box-shadow: inset 0 0 0 1px rgba(37,37,96,0.5), 0 8px 40px rgba(0,0,0,0.7); position: relative; transition: border-color 150ms ease-out, box-shadow 150ms ease-out; } .ds-panel::before, .ds-panel::after { content: ''; position: absolute; width: 10px; height: 10px; border-color: #4040a0; border-style: solid; pointer-events: none; z-index: 1; } .ds-panel::before { top: 4px; left: 4px; border-width: 1px 0 0 1px; } .ds-panel::after { bottom: 4px; right: 4px; border-width: 0 1px 1px 0; } .ds-panel:hover { border-color: #4040a0; box-shadow: inset 0 0 0 1px rgba(64,64,160,0.2), 0 0 20px rgba(64,64,160,0.12); } .ds-panel-header { display: flex; align-items: center; gap: 8px; padding: 1.25rem 1.5rem 1rem; } .ds-panel-marker { color: #4040a0; font-size: 0.55rem; } .ds-panel-label { font-family: 'Cinzel', Georgia, serif; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: #3a4870; } .ds-panel-body { padding: 0 1.5rem 1.25rem; }"
+    },
+    {
+      "name": "Badge Profit",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Profit/success badge. Mako green. Share Tech Mono. Used for positive margin values.",
+      "html": "<span class=\"ds-badge-profit\">+12,450 gil</span>",
+      "css": ".ds-badge-profit { font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 0.72rem; color: #00dd77; border: 1px solid rgba(0,221,119,0.3); background: rgba(0,50,25,0.4); padding: 0.1rem 0.45rem; border-radius: 0; white-space: nowrap; }"
+    },
+    {
+      "name": "Badge Loss",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Loss/danger badge. Phoenix Fire red. Used for negative margin values and errors.",
+      "html": "<span class=\"ds-badge-loss\">-3,200 gil</span>",
+      "css": ".ds-badge-loss { font-family: 'Share Tech Mono', ui-monospace, monospace; font-size: 0.72rem; color: #ff5533; border: 1px solid rgba(255,85,51,0.3); background: rgba(50,15,5,0.4); padding: 0.1rem 0.45rem; border-radius: 0; white-space: nowrap; }"
+    },
+    {
+      "name": "ATB Loading Bar",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Active Time Battle loading gauge. The system's signature async feedback pattern. Never substitute with a spinner.",
+      "html": "<div class=\"ds-atb-track\"><div class=\"ds-atb-fill\"></div></div>",
+      "css": "@keyframes ds-atb-sweep { 0% { width: 0%; opacity: 1; } 85% { width: 95%; opacity: 1; } 100% { width: 100%; opacity: 0.5; } } .ds-atb-track { width: 100%; height: 3px; background: rgba(37,37,96,0.6); overflow: hidden; } .ds-atb-fill { height: 100%; background: linear-gradient(90deg, #5599ff 0%, #00dd77 60%, #f0c030 100%); box-shadow: 0 0 8px rgba(85,153,255,0.7); animation: ds-atb-sweep 1.8s ease-in-out infinite; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Sticky top nav. Cinzel labels, crystal active state, dim default, blur backdrop.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link\" href=\"#\">Itens</a><a class=\"ds-nav-link ds-nav-link--active\" href=\"#\">Craft</a><a class=\"ds-nav-link\" href=\"#\">Histórico</a></nav>",
+      "css": ".ds-nav { background: rgba(5,5,13,0.97); border-bottom: 1px solid #252560; box-shadow: 0 1px 20px rgba(0,0,0,0.6); backdrop-filter: blur(14px); display: flex; align-items: center; gap: 20px; padding: 0 24px; height: 3rem; } .ds-nav-link { font-family: 'Cinzel', Georgia, serif; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: #4a5470; text-decoration: none; position: relative; padding-bottom: 1px; transition: color 120ms ease-out; } .ds-nav-link:hover { color: #9aa8c8; } .ds-nav-link--active { color: #5599ff; text-shadow: 0 0 10px rgba(85,153,255,0.5); } .ds-nav-link--active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: #5599ff; box-shadow: 0 0 6px rgba(85,153,255,0.8); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Crystal Chronicle",
+    "overview": "The Crystal Chronicle does not embellish. It records. Every screen in this system is a page in an ancient tome that has been keeping the truth since the Age of Ancients: prices, margins, profit, loss. The typography is Cinzel because this information is inscribed, not typed. The background is near-black void because the crystals need darkness to glow. Crystal blue marks what is alive and interactive; Gil Gold marks what is primary and consequential; Mako Green marks what is profitable and alive.\n\nThe design is ceremonious and precise. A button press carries the weight of confirming a battle action. Nothing is rounded because softness would undermine the gravity of market data. Every interaction is deliberate: crystal glow on focus, gold shimmer on primary actions, the ATB bar when the system is thinking.\n\nThis system explicitly rejects: the generic SaaS dashboard; the gamer RGB aesthetic; and mobile-first layouts that sacrifice data density for appearance of cleanliness.",
+    "keyCharacteristics": [
+      "Zero border-radius: every surface is angular, deliberate, a page or panel",
+      "Semantic color system: crystal (interactive), mako (profit), fire (loss), gold (primary action), materia (rare)",
+      "Two typefaces only: Cinzel for headings/labels, Share Tech Mono for numbers",
+      "Structural shadow (ff-box depth) + status glow serve distinct roles and must never be conflated",
+      "ATB loading bar as the system's signature feedback pattern"
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Each accent color has one job. Crystal is interactive. Mako is profit. Fire is danger. Gold is primary action. Materia is rare. These roles never overlap.", "section": "colors" },
+      { "name": "The Gradient Exception", "body": "The ff-title class uses gradient text for the brand mark only. All other text uses a single solid color.", "section": "colors" },
+      { "name": "The Two Voice Rule", "body": "Cinzel and Share Tech Mono are the only expressive typefaces. Figtree handles body prose. Never introduce a third display typeface.", "section": "typography" },
+      { "name": "The Mono Rule", "body": "Every number is Share Tech Mono. This is a data-integrity signal. Monospaced numbers align in columns and mark 'this is a value, not a name.'", "section": "typography" },
+      { "name": "The Flat-at-Rest Rule", "body": "Elements are flat by default. Shadows appear only on ff-box panels (structural) and interactive elements in active state (glow).", "section": "elevation" },
+      { "name": "The Two Shadow Roles Rule", "body": "Structural shadows (ambient black) establish planes. Glow shadows (colored) communicate state. Never conflate them.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use border-radius: 0 on every interactive element: buttons, inputs, panels, badges.",
+      "Do use Share Tech Mono for every numeric value: prices, percentages, item counts, timestamps, IDs.",
+      "Do use the ATB bar for every async loading state. Spinners break the vocabulary.",
+      "Do use semantic accent colors exclusively in their assigned roles.",
+      "Do place the crystal glow on focus-visible states across all interactive elements.",
+      "Do prefix every ff-label section header with a ◆ or ✦ decorative marker in indigo-hi.",
+      "Do include prefers-reduced-motion overrides when adding any new animation."
+    ],
+    "donts": [
+      "Don't use border-left or border-right greater than 1px as a colored accent stripe on cards or callouts.",
+      "Don't use background-clip: text with a gradient on anything except the primary brand ff-title class.",
+      "Don't use glassmorphism decoratively. The nav's backdrop-filter is the single justified exception.",
+      "Don't build a hero-metric template: big number, small label, gradient accent, supporting stats.",
+      "Don't build identical card grids (same-sized cards, icon + heading + text repeated).",
+      "Don't introduce a third display typeface. Cinzel, Share Tech Mono, and Figtree are the complete vocabulary.",
+      "Don't use neon rainbow or RGB effects.",
+      "Don't design for mobile-first at the expense of desktop data density.",
+      "Don't put body text or data values in Cinzel.",
+      "Don't use colored glows as decorative ambient effects on static elements."
+    ]
+  }
+}

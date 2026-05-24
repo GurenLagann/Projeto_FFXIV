@@ -14,12 +14,38 @@ class Item extends Model
 
     protected $fillable = ['id', 'name', 'level', 'job_id', 'stars', 'icon', 'is_craftable'];
 
+    protected $appends = ['icon_url'];
+
     protected $casts = [
         'level'        => 'integer',
         'stars'        => 'integer',
         'job_id'       => 'integer',
         'is_craftable' => 'boolean',
     ];
+
+    /**
+     * Resolve o ícone para URL absoluta.
+     *
+     * Dois formatos existem no banco dependendo de qual API os gravou:
+     *   - v1 XIVAPI (recipes):   "/i/022000/022001.png"       → xivapi.com
+     *   - v2 XIVAPI (gathering): "/ui/icon/022000/022001.png" → v2.xivapi.com
+     */
+    public function getIconUrlAttribute(): ?string
+    {
+        if (!$this->icon) {
+            return null;
+        }
+
+        if (str_starts_with($this->icon, 'http')) {
+            return $this->icon;
+        }
+
+        if (str_starts_with($this->icon, '/ui/')) {
+            return 'https://v2.xivapi.com' . $this->icon;
+        }
+
+        return 'https://xivapi.com' . $this->icon;
+    }
 
     public function recipe(): HasOne
     {

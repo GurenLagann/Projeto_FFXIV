@@ -23,7 +23,7 @@
             --materia: #a855f7;
             --fire:    #ff5533;
             --text:    #ccd4f0;
-            --dim:     #4a5470;
+            --dim:     #7280a0;
         }
 
         html, body { height: 100%; }
@@ -123,7 +123,7 @@
             color: var(--gold);
             padding: 0.75rem 1.5rem;
             cursor: pointer;
-            transition: all 120ms ease;
+            transition: background 120ms ease, color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -148,7 +148,7 @@
             color: var(--dim);
             padding: 0.65rem 1.5rem;
             cursor: pointer;
-            transition: all 120ms ease;
+            transition: border-color 120ms ease, color 120ms ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -276,7 +276,7 @@
         </div>
 
         {{-- Tagline --}}
-        <p style="font-size:0.78rem;color:#4a5470;margin-bottom:2rem;line-height:1.6;">
+        <p style="font-size:0.78rem;color:var(--dim);margin-bottom:2rem;line-height:1.6;">
             Analise oportunidades de crafting em tempo real.<br>
             Dados do Universalis &amp; XIVAPI.
         </p>

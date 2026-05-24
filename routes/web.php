@@ -11,6 +11,7 @@ Route::post('/analyze', [MarketController::class, 'analyze'])->name('market.anal
 Route::get('/history', [MarketController::class, 'history'])->name('market.history');
 Route::get('/items', fn() => view('items.index'))->name('items.index');
 Route::get('/craft', fn() => view('craft.index'))->name('craft.index');
+Route::get('/health', fn() => view('health'))->name('health');
 Route::get('/analysis/{analysis}', [MarketController::class, 'showAnalysis'])->name('market.analysis.show');
 Route::get('/analysis/{analysis}/export', [MarketController::class, 'export'])->name('market.analysis.export');
 

@@ -16,7 +16,7 @@
                 </span>
             @endif
         </div>
-        <p class="mt-1.5" style="font-size:0.78rem;color:#4a5470;">
+        <p class="mt-1.5" style="font-size:0.78rem;color:var(--dim);">
             {{ $analysis->server->name ?? 'N/A' }}
             <span style="color:#252560;margin:0 0.5rem;">◆</span>
             <span class="ff-num">{{ $analysis->created_at->format('d/m/Y H:i') }}</span>
@@ -47,7 +47,7 @@
     <div class="ff-box ff-card-hover p-5">
         <p class="ff-label mb-3" style="font-size:0.55rem;color:#1a2a5a;">Duração</p>
         <p class="ff-num font-bold" style="font-size:1.9rem;color:#5599ff;">
-            {{ number_format($analysis->execution_time ?? 0) }}<span style="font-size:0.9rem;color:#3a4060;margin-left:2px;">ms</span>
+            {{ number_format($analysis->execution_time ?? 0) }}<span style="font-size:0.9rem;color:var(--dim);margin-left:2px;">ms</span>
         </p>
         <div class="mt-3 h-px" style="background:linear-gradient(90deg,#5599ff30,transparent);"></div>
     </div>
@@ -71,7 +71,7 @@
     @if(empty($analysis->results))
         <div class="p-12 text-center">
             <div style="font-size:2.5rem;color:#252560;margin-bottom:1rem;" aria-hidden="true">◇</div>
-            <p class="ff-label" style="color:#3a4060;font-size:0.65rem;">Nenhum resultado registrado</p>
+            <p class="ff-label" style="color:var(--dim);font-size:0.65rem;">Nenhum resultado registrado</p>
         </div>
     @else
         <div class="overflow-x-auto">
@@ -113,11 +113,11 @@
                                 </span>
                             </td>
                             <td class="text-right hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.78rem;">
+                                style="color:var(--dim);font-size:0.78rem;">
                                 {{ number_format($r['costEstimate']) }}
                             </td>
                             <td class="text-right hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.78rem;">
+                                style="color:var(--dim);font-size:0.78rem;">
                                 {{ number_format($r['revenueEstimate']) }}
                             </td>
                             <td class="text-right whitespace-nowrap">
@@ -130,7 +130,7 @@
                                 @endif
                             </td>
                             <td class="text-right hidden sm:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.75rem;">
+                                style="color:var(--dim);font-size:0.75rem;">
                                 {{ number_format($r['salesPerWeek'], 1) }}/sem
                             </td>
                         </tr>

@@ -30,11 +30,11 @@
 
             {{-- Item --}}
             <div x-data="{
-                    iconUrl: '{{ old('item_id') ? 'https://xivapi.com' . ($items->firstWhere('id', old('item_id'))?->icon ?? '') : '' }}',
+                    iconUrl: '{{ old('item_id') ? ($items->firstWhere('id', old('item_id'))?->iconUrl ?? '') : '' }}',
                     onChange(e) {
                         const opt = e.target.selectedOptions[0];
-                        const icon = opt ? opt.dataset.icon : '';
-                        this.iconUrl = icon ? 'https://xivapi.com' + icon : '';
+                        const url = opt ? opt.dataset.icon : '';
+                        this.iconUrl = url || '';
                     }
                 }">
                 <label for="item_id" class="ff-label">
@@ -52,7 +52,7 @@
                         <option value="">── selecione um item craftável ──</option>
                         @foreach($items as $item)
                             <option value="{{ $item->id }}"
-                                    data-icon="{{ $item->icon }}"
+                                    data-icon="{{ $item->iconUrl }}"
                                     {{ old('item_id') == $item->id ? 'selected' : '' }}>
                                 {{ $item->name }}
                             </option>
@@ -90,7 +90,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="min_profit" class="ff-label">
-                        Lucro Mínimo <span style="color:#4a5470;">(gil)</span>
+                        Lucro Mínimo <span style="color:var(--dim);">(gil)</span>
                         <span style="color:#ff5533;" aria-label="obrigatório">*</span>
                     </label>
                     <input type="number" id="min_profit" name="min_profit"
@@ -103,7 +103,7 @@
                 </div>
                 <div>
                     <label for="min_margin" class="ff-label">
-                        Margem Mínima <span style="color:#4a5470;">(%)</span>
+                        Margem Mínima <span style="color:var(--dim);">(%)</span>
                         <span style="color:#ff5533;" aria-label="obrigatório">*</span>
                     </label>
                     <input type="number" id="min_margin" name="min_margin"

@@ -7,58 +7,30 @@
     <title>@yield('title', 'FFXIV Market Analyzer')</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-    {{-- FF Fonts: Cinzel (medieval FF5) + Share Tech Mono (FF7 terminal) --}}
+    {{-- Fonts: Cinzel (FF5 medieval) + Share Tech Mono (FF7 terminal) + Figtree (body) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Figtree:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ff: {
-                            bg:      '#06060f',
-                            surface: '#0b0b1e',
-                            card:    '#0f0f28',
-                            hover:   '#141438',
-                            border:  '#252560',
-                            hi:      '#4040a0',
-                            crystal: '#5599ff',
-                            mako:    '#00dd77',
-                            gold:    '#f0c030',
-                            materia: '#a855f7',
-                            fire:    '#ff5533',
-                            text:    '#ccd4f0',
-                            dim:     '#5a6080',
-                        }
-                    },
-                }
-            }
-        }
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- Vite-compiled Tailwind + Alpine (Alpine v3 is bundled by Livewire v4 — no separate import) --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
     <style>
         :root {
-            --bg:      #06060f;
-            --surface: #0b0b1e;
-            --card:    #0f0f28;
-            --border:  #252560;
-            --hi:      #4040a0;
-            --crystal: #5599ff;
-            --mako:    #00dd77;
-            --gold:    #f0c030;
-            --materia: #a855f7;
-            --fire:    #ff5533;
-            --text:    #ccd4f0;
-            --dim:     #4a5470;
+            --bg:       #06060f;
+            --surface:  #0b0b1e;
+            --card:     #0f0f28;
+            --border:   #252560;
+            --hi:       #4040a0;   /* structural: borders, brackets, decorative markers — no contrast req */
+            --hi-label: #7878c8;   /* text use of hi — 5.1:1 on --bg, 4.75:1 on --card — WCAG AA */
+            --crystal:  #5599ff;
+            --mako:     #00dd77;
+            --gold:     #f0c030;
+            --materia:  #a855f7;
+            --fire:     #ff5533;
+            --text:     #ccd4f0;
+            --dim:      #7280a0;   /* raised from #4a5470 — 5.1:1 on --bg, 4.74:1 on --card — WCAG AA */
         }
 
         html { scroll-behavior: smooth; }
@@ -69,7 +41,7 @@
                 radial-gradient(ellipse 90% 40% at 50% -5%, rgba(85,153,255,0.07) 0%, transparent 55%),
                 radial-gradient(ellipse 50% 30% at 85% 95%, rgba(0,221,119,0.04) 0%, transparent 50%);
             color: var(--text);
-            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -131,7 +103,7 @@
             font-size: 0.6rem;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: var(--hi);
+            color: var(--hi-label); /* #7878c8 — 5.1:1 WCAG AA on all dark surfaces */
         }
 
         .ff-num {
@@ -167,7 +139,7 @@
             border-color: var(--crystal);
             box-shadow: 0 0 0 1px rgba(85,153,255,0.12), inset 0 0 10px rgba(85,153,255,0.04);
         }
-        .ff-input::placeholder { color: #28304a; }
+        .ff-input::placeholder { color: #3a4568; }
 
         /* ── Primary Button (FF gold) ── */
         .ff-btn-primary {
@@ -361,17 +333,45 @@
         @media (prefers-reduced-motion: reduce) {
             *, .ff-card-hover { transition: none !important; animation: none !important; }
         }
+
+        /* ── Alpine init guard ── */
+        [x-cloak] { display: none !important; }
+
+        /* ── Mobile nav drawer link ── */
+        .ff-mobile-link {
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--dim);
+            display: block;
+            padding: 0.75rem 0;
+            min-height: 44px;
+            text-decoration: none;
+            transition: color 120ms;
+            border: none;
+            background: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .ff-mobile-link:hover  { color: #9aa8c8; }
+        .ff-mobile-link.active { color: var(--crystal); text-shadow: 0 0 8px rgba(85,153,255,0.4); }
+
+        /* ── Touch target floor (44px) for dense interactive elements ── */
+        .ff-touch { min-height: 44px; }
     </style>
     @stack('styles')
 </head>
 <body class="min-h-screen">
 
 {{-- Navigation --}}
-<nav class="ff-nav sticky top-0 z-50">
+<nav class="ff-nav sticky top-0 z-50" x-data="{ mobileOpen: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-12">
 
-            {{-- Brand + primary links --}}
+            {{-- Brand + desktop primary links --}}
             <div class="flex items-center gap-5">
                 <a href="{{ route('market.dashboard') }}"
                    class="flex items-center gap-2.5 group"
@@ -386,63 +386,154 @@
                     <span class="ff-title text-sm tracking-widest hidden sm:block">FFXIV MARKET</span>
                 </a>
 
-                <span class="w-px h-3.5 bg-[#252560]" aria-hidden="true"></span>
+                <span class="w-px h-3.5 bg-[#252560] hidden sm:block" aria-hidden="true"></span>
 
                 <a href="{{ route('items.index') }}"
-                   class="nav-lnk {{ request()->routeIs('items.*') ? 'active' : '' }}">
+                   class="nav-lnk hidden sm:block {{ request()->routeIs('items.*') ? 'active' : '' }}">
                     Itens
                 </a>
-
                 <a href="{{ route('craft.index') }}"
-                   class="nav-lnk {{ request()->routeIs('craft.*') ? 'active' : '' }}">
+                   class="nav-lnk hidden sm:block {{ request()->routeIs('craft.*') ? 'active' : '' }}">
                     Craft
                 </a>
-
                 <a href="{{ route('market.history') }}"
-                   class="nav-lnk {{ request()->routeIs('market.history') ? 'active' : '' }}">
+                   class="nav-lnk hidden sm:block {{ request()->routeIs('market.history') ? 'active' : '' }}">
                     Histórico
+                </a>
+                <a href="{{ route('health') }}"
+                   class="nav-lnk hidden sm:block {{ request()->routeIs('health') ? 'active' : '' }}"
+                   title="Status das APIs externas e serviços internos">
+                    Status
                 </a>
             </div>
 
-            {{-- Auth area --}}
+            {{-- Desktop auth + mobile hamburger --}}
             <div class="flex items-center gap-4">
+
+                {{-- Desktop auth (hidden on mobile) --}}
                 @auth
-                    <a href="{{ route('alerts.index') }}"
-                       class="nav-lnk {{ request()->routeIs('alerts.*') ? 'active' : '' }}">
-                        Alertas
-                    </a>
-
-                    <a href="{{ route('lodestone.show') }}"
-                       class="flex items-center gap-1.5 nav-lnk {{ request()->routeIs('lodestone.*') ? 'active' : '' }}"
-                       title="{{ auth()->user()->isCharacterVerified() ? auth()->user()->character_name : 'Vincular personagem' }}">
-                        @if(auth()->user()->isCharacterVerified())
-                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--mako)]"
-                                  style="box-shadow:0 0 5px rgba(0,221,119,0.7);" aria-hidden="true"></span>
-                        @endif
-                        Personagem
-                    </a>
-
-                    <span class="w-px h-3.5 bg-[#252560]" aria-hidden="true"></span>
-
-                    <span class="ff-label hidden sm:block" style="color:#2e3a5a;">
-                        {{ strtoupper(auth()->user()->name) }}
-                    </span>
-
-                    <form method="POST" action="{{ route('logout') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="nav-lnk hover:!text-[var(--fire)] hover:!text-shadow-none"
-                                aria-label="Sair da conta">
-                            Sair
-                        </button>
-                    </form>
+                    <div class="hidden sm:flex items-center gap-4">
+                        <a href="{{ route('alerts.index') }}"
+                           class="nav-lnk {{ request()->routeIs('alerts.*') ? 'active' : '' }}">
+                            Alertas
+                        </a>
+                        <a href="{{ route('lodestone.show') }}"
+                           class="flex items-center gap-1.5 nav-lnk {{ request()->routeIs('lodestone.*') ? 'active' : '' }}"
+                           title="{{ auth()->user()->isCharacterVerified() ? auth()->user()->character_name : 'Vincular personagem' }}">
+                            @if(auth()->user()->isCharacterVerified())
+                                <span class="w-1.5 h-1.5 rounded-full bg-[var(--mako)]"
+                                      style="box-shadow:0 0 5px rgba(0,221,119,0.7);" aria-hidden="true"></span>
+                            @endif
+                            Personagem
+                        </a>
+                        <span class="w-px h-3.5 bg-[#252560]" aria-hidden="true"></span>
+                        <span class="ff-label" style="color:#2e3a5a;max-width:7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:bottom;"
+                              title="{{ auth()->user()->name }}">
+                            {{ strtoupper(auth()->user()->name) }}
+                        </span>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit"
+                                    class="nav-lnk hover:!text-[var(--fire)] hover:!text-shadow-none"
+                                    aria-label="Sair da conta">
+                                Sair
+                            </button>
+                        </form>
+                    </div>
                 @else
-                    <a href="{{ route('login') }}" class="nav-lnk">Entrar</a>
-                    <a href="{{ route('register') }}" class="ff-btn-primary" style="padding:0.3rem 0.9rem;font-size:0.6rem;">
-                        Registrar
-                    </a>
+                    <div class="hidden sm:flex items-center gap-3">
+                        <a href="{{ route('login') }}" class="nav-lnk">Entrar</a>
+                        <a href="{{ route('register') }}" class="ff-btn-primary"
+                           style="padding:0.3rem 0.9rem;font-size:0.6rem;">
+                            Registrar
+                        </a>
+                    </div>
                 @endauth
+
+                {{-- Mobile hamburger (hidden on sm+) --}}
+                <button type="button"
+                        class="sm:hidden nav-lnk"
+                        style="font-size:1.15rem;min-width:44px;min-height:44px;
+                               display:flex;align-items:center;justify-content:center;padding:0;"
+                        @click="mobileOpen = !mobileOpen"
+                        :aria-expanded="mobileOpen.toString()"
+                        aria-controls="ff-mobile-menu"
+                        aria-label="Menu de navegação">
+                    <span x-text="mobileOpen ? '✕' : '☰'" aria-hidden="true"></span>
+                </button>
             </div>
         </div>
+    </div>
+
+    {{-- Mobile drawer --}}
+    <div id="ff-mobile-menu"
+         x-show="mobileOpen"
+         x-cloak
+         style="border-top:1px solid #1a1a38;background:rgba(5,5,13,0.99);
+                box-shadow:0 8px 32px rgba(0,0,0,0.7);"
+         class="sm:hidden"
+         @keydown.escape.window="mobileOpen = false">
+        <nav class="max-w-7xl mx-auto px-6 py-2" aria-label="Menu mobile">
+
+            {{-- Primary pages --}}
+            <a href="{{ route('market.dashboard') }}"
+               class="ff-mobile-link {{ request()->routeIs('market.dashboard') ? 'active' : '' }}">
+                Início
+            </a>
+            <a href="{{ route('items.index') }}"
+               class="ff-mobile-link {{ request()->routeIs('items.*') ? 'active' : '' }}">
+                Itens
+            </a>
+            <a href="{{ route('craft.index') }}"
+               class="ff-mobile-link {{ request()->routeIs('craft.*') ? 'active' : '' }}">
+                Craft
+            </a>
+            <a href="{{ route('market.history') }}"
+               class="ff-mobile-link {{ request()->routeIs('market.history') ? 'active' : '' }}">
+                Histórico
+            </a>
+            <a href="{{ route('health') }}"
+               class="ff-mobile-link {{ request()->routeIs('health') ? 'active' : '' }}">
+                Status
+            </a>
+
+            {{-- Auth section --}}
+            @auth
+                <div style="height:1px;background:#1a1a38;margin:0.25rem 0;" aria-hidden="true"></div>
+                <a href="{{ route('alerts.index') }}"
+                   class="ff-mobile-link {{ request()->routeIs('alerts.*') ? 'active' : '' }}">
+                    Alertas
+                </a>
+                <a href="{{ route('lodestone.show') }}"
+                   class="ff-mobile-link {{ request()->routeIs('lodestone.*') ? 'active' : '' }}">
+                    @if(auth()->user()->isCharacterVerified())
+                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-[var(--mako)]"
+                              style="box-shadow:0 0 5px rgba(0,221,119,0.7);margin-right:0.4rem;vertical-align:middle;"
+                              aria-hidden="true"></span>
+                    @endif
+                    Personagem
+                </a>
+                <div style="height:1px;background:#1a1a38;margin:0.25rem 0;" aria-hidden="true"></div>
+                <span class="ff-label" style="font-size:0.48rem;color:#2e3a5a;letter-spacing:0.22em;display:block;padding:0.4rem 0;
+                                              max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                      title="{{ auth()->user()->name }}">
+                    {{ strtoupper(auth()->user()->name) }}
+                </span>
+                <form method="POST" action="{{ route('logout') }}" class="mb-2">
+                    @csrf
+                    <button type="submit" class="ff-mobile-link" style="color:var(--fire);">
+                        Sair
+                    </button>
+                </form>
+            @else
+                <div style="height:1px;background:#1a1a38;margin:0.25rem 0;" aria-hidden="true"></div>
+                <a href="{{ route('login') }}" class="ff-mobile-link">Entrar</a>
+                <a href="{{ route('register') }}" class="ff-mobile-link" style="color:var(--crystal);">
+                    Registrar
+                </a>
+                <div class="pb-1"></div>
+            @endauth
+        </nav>
     </div>
 </nav>
 
@@ -468,11 +559,12 @@
     @yield('content')
 </main>
 
-<footer class="border-t border-[#252560]/50 mt-16 py-6 text-center">
-    <p class="ff-label text-[0.55rem] tracking-[0.25em]" style="color:#2a3060;">
+<footer class="border-t border-[#252560]/50 mt-16 py-6 text-center" aria-label="Rodapé">
+    {{-- Purely decorative — aria-hidden removes from accessibility tree --}}
+    <p class="ff-label text-[0.55rem] tracking-[0.25em]" style="color:#2a3060;" aria-hidden="true">
         ✦ &nbsp; FFXIV MARKET ANALYZER &nbsp; ✦
     </p>
-    <p class="mt-1" style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:#1e244a;letter-spacing:0.15em;">
+    <p class="mt-1" style="font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:#1e244a;letter-spacing:0.15em;" aria-hidden="true">
         UNIVERSALIS · XIVAPI · EORZEA
     </p>
 </footer>

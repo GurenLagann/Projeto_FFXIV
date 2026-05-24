@@ -33,7 +33,7 @@ class ProfitCalculator
         return new ProfitResult(
             itemId:             (int) $recipe->item_id,
             itemName:           $recipe->item->name ?? "Item #{$recipe->item_id}",
-            itemIcon:           $recipe->item->icon ?? null,
+            itemIcon:           $recipe->item->iconUrl ?? null,
             profit:             $profit,
             costEstimate:       $craftCost,
             revenueEstimate:    $revenue,

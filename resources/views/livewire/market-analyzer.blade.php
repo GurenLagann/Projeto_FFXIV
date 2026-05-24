@@ -27,7 +27,7 @@
          style="background:linear-gradient(90deg,rgba(0,221,119,0.05) 0%,rgba(0,100,50,0.03) 100%);
                 border:1px solid rgba(0,221,119,0.18);
                 padding:0.65rem 1rem;">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
                 @if($characterAvatar)
                     <div style="position:relative;flex-shrink:0;">
@@ -80,6 +80,29 @@
         </div>
     @endif
 
+    {{-- ── Modo de análise ── --}}
+    <div class="px-6 pt-5 pb-0">
+        <div class="flex items-center gap-2 mb-2.5">
+            <div style="height:1px;width:10px;background:linear-gradient(90deg,transparent,#252560);"></div>
+            <span class="ff-label" style="font-size:0.5rem;color:#3a4870;letter-spacing:0.2em;">MODO DE ANÁLISE</span>
+            <div style="height:1px;flex:1;background:#252560;"></div>
+        </div>
+        <div class="flex gap-0 border w-fit" style="border-color:#252560;">
+            @foreach(['craft' => '⚒ Craft', 'gathering' => '⛏ Coleta', 'all' => '⚒ + ⛏ Ambos'] as $mode => $label)
+                <button type="button" wire:click="setAnalysisMode('{{ $mode }}')"
+                        class="ff-touch"
+                        style="padding:0.38rem 1rem;font-family:'Cinzel',serif;font-size:0.55rem;
+                               letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;
+                               border-right:{{ !$loop->last ? '1px solid #252560' : 'none' }};
+                               background:{{ $analysisMode === $mode ? 'rgba(85,153,255,0.1)' : 'rgba(4,4,14,0.8)' }};
+                               color:{{ $analysisMode === $mode ? '#5599ff' : '#3a4870' }};
+                               transition:background 120ms,color 120ms;">
+                    {{ $label }}
+                </button>
+            @endforeach
+        </div>
+    </div>
+
     {{-- ── Servidor + Job ── --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 px-6 pt-5 pb-0">
 
@@ -90,7 +113,7 @@
                 <span class="ff-label" style="font-size:0.5rem;color:#3a4870;letter-spacing:0.2em;">SERVIDOR</span>
                 <div style="height:1px;flex:1;background:#252560;"></div>
             </div>
-            <select wire:model="serverId"
+            <select wire:model="serverId" id="filter-server" aria-label="Servidor"
                     style="background:rgba(4,4,14,0.95);border:1px solid #252560;color:#ccd4f0;
                            padding:0.55rem 0.8rem;font-size:0.875rem;width:100%;border-radius:0;">
                 <option value="">── selecione ──</option>
@@ -111,60 +134,92 @@
             @enderror
         </div>
 
-        {{-- Job Grid --}}
+        {{-- Job Grid — só para craft / ambos --}}
         <div>
             <div class="flex items-center gap-2 mb-2.5">
                 <div style="height:1px;width:10px;background:linear-gradient(90deg,transparent,#252560);"></div>
-                <span class="ff-label" style="font-size:0.5rem;color:#3a4870;letter-spacing:0.2em;">JOB DE CRAFTING</span>
+                <span class="ff-label" style="font-size:0.5rem;color:#3a4870;letter-spacing:0.2em;">
+                    {{ $analysisMode === 'gathering' ? 'FONTE DE COLETA' : 'JOB DE CRAFTING' }}
+                </span>
                 <div style="height:1px;flex:1;background:#252560;"></div>
             </div>
-            <div class="grid gap-1" style="grid-template-columns:repeat(5,1fr);">
 
-                {{-- ALL --}}
-                <button type="button" wire:click="$set('jobId', null)"
-                        title="Todos os Jobs"
-                        style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                               gap:2px;padding:0.4rem 0.15rem;border:1px solid;cursor:pointer;
-                               border-color:{{ $jobId === null ? '#f0c030' : '#1e1e40' }};
-                               background:{{ $jobId === null ? 'rgba(240,192,48,0.09)' : 'rgba(4,4,14,0.8)' }};
-                               transition:border-color 100ms,background 100ms;">
-                    <span style="font-size:0.95rem;line-height:1;
-                                 color:{{ $jobId === null ? '#f0c030' : '#2a3050' }};">✦</span>
-                    <span style="font-family:'Share Tech Mono',monospace;font-size:0.46rem;
-                                 color:{{ $jobId === null ? '#f0c030' : '#3a4460' }};">ALL</span>
-                </button>
+            {{-- Filtro de fonte (modo coleta ou ambos) --}}
+            @if($analysisMode !== 'craft')
+                <div class="flex flex-wrap gap-1 mb-2">
+                    @foreach([null => '✦ Todos', 'gathering' => '⛏ MIN / BTN', 'fishing' => '🎣 FSH'] as $src => $lbl)
+                        <button type="button"
+                                wire:click="toggleGatheringSource({{ $src === null ? 'null' : "'$src'" }})"
+                                class="ff-touch"
+                                style="padding:0.38rem 0.75rem;border:1px solid;cursor:pointer;
+                                       font-family:'Cinzel',serif;font-size:0.52rem;letter-spacing:0.08em;
+                                       border-color:{{ $gatheringSource === $src
+                                           ? ($src === 'fishing' ? '#5599ff' : ($src === null ? '#8899cc' : '#00dd77'))
+                                           : '#1e1e40' }};
+                                       background:{{ $gatheringSource === $src
+                                           ? ($src === 'fishing' ? 'rgba(85,153,255,0.08)' : ($src === null ? 'rgba(85,153,255,0.05)' : 'rgba(0,221,119,0.06)'))
+                                           : 'rgba(4,4,14,0.8)' }};
+                                       color:{{ $gatheringSource === $src
+                                           ? ($src === 'fishing' ? '#5599ff' : ($src === null ? '#8899cc' : '#00dd77'))
+                                           : '#3a4460' }};
+                                       transition:border-color 100ms,background 100ms,color 100ms;">
+                            {{ $lbl }}
+                        </button>
+                    @endforeach
+                </div>
+            @endif
 
-                {{-- Individual jobs --}}
-                @foreach($jobs as $job)
-                    @if($job->value !== 0)
-                    @php $charLv = $characterJobLevels[$job->value] ?? 0; @endphp
-                    <button type="button"
-                            wire:click="$set('jobId', {{ $job->value }})"
-                            title="{{ $job->getLabel() }}{{ $charLv ? ' · Lv '.$charLv : '' }}"
+            {{-- Job grid (modo craft ou ambos) --}}
+            @if($analysisMode !== 'gathering')
+                <div class="grid gap-1" style="grid-template-columns:repeat(5,1fr);">
+                    {{-- ALL --}}
+                    <button type="button" wire:click="$set('jobId', null)"
+                            title="Todos os Jobs"
+                            class="ff-touch"
                             style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                                   gap:2px;padding:0.4rem 0.1rem;border:1px solid;cursor:pointer;
-                                   border-color:{{ $jobId === $job->value ? '#f0c030' : '#1e1e40' }};
-                                   background:{{ $jobId === $job->value ? 'rgba(240,192,48,0.09)' : 'rgba(4,4,14,0.8)' }};
+                                   gap:2px;padding:0.4rem 0.15rem;border:1px solid;cursor:pointer;
+                                   border-color:{{ $jobId === null ? '#f0c030' : '#1e1e40' }};
+                                   background:{{ $jobId === null ? 'rgba(240,192,48,0.09)' : 'rgba(4,4,14,0.8)' }};
                                    transition:border-color 100ms,background 100ms;">
-                        <img src="{{ $job->getIconUrl() }}" alt="{{ $job->getAbbreviation() }}"
-                             width="22" height="22"
-                             style="image-rendering:pixelated;
-                                    opacity:{{ $jobId === $job->value ? '1' : ($charLv ? '0.6' : '0.35') }};
-                                    transition:opacity 100ms;">
-                        <span style="font-family:'Share Tech Mono',monospace;font-size:0.44rem;line-height:1;
-                                     color:{{ $jobId === $job->value ? '#f0c030' : '#3a4460' }};">
-                            {{ $job->getAbbreviation() }}
-                        </span>
-                        @if($charLv)
-                            <span style="font-family:'Share Tech Mono',monospace;font-size:0.4rem;line-height:1;
-                                         color:{{ $jobId === $job->value ? '#00cc66' : '#1a3a28' }};">
-                                {{ $charLv }}
-                            </span>
-                        @endif
+                        <span style="font-size:0.95rem;line-height:1;
+                                     color:{{ $jobId === null ? '#f0c030' : '#2a3050' }};">✦</span>
+                        <span style="font-family:'Share Tech Mono',monospace;font-size:0.46rem;
+                                     color:{{ $jobId === null ? '#f0c030' : '#3a4460' }};">ALL</span>
                     </button>
-                    @endif
-                @endforeach
-            </div>
+
+                    {{-- Individual jobs --}}
+                    @foreach($jobs as $job)
+                        @if($job->value !== 0)
+                        @php $charLv = $characterJobLevels[$job->value] ?? 0; @endphp
+                        <button type="button"
+                                wire:click="$set('jobId', {{ $job->value }})"
+                                title="{{ $job->getLabel() }}{{ $charLv ? ' · Lv '.$charLv : '' }}"
+                                class="ff-touch"
+                                style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                                       gap:2px;padding:0.4rem 0.1rem;border:1px solid;cursor:pointer;
+                                       border-color:{{ $jobId === $job->value ? '#f0c030' : '#1e1e40' }};
+                                       background:{{ $jobId === $job->value ? 'rgba(240,192,48,0.09)' : 'rgba(4,4,14,0.8)' }};
+                                       transition:border-color 100ms,background 100ms;">
+                            <img src="{{ $job->getIconUrl() }}" alt="{{ $job->getAbbreviation() }}"
+                                 width="22" height="22"
+                                 style="image-rendering:pixelated;
+                                        opacity:{{ $jobId === $job->value ? '1' : ($charLv ? '0.6' : '0.35') }};
+                                        transition:opacity 100ms;">
+                            <span style="font-family:'Share Tech Mono',monospace;font-size:0.44rem;line-height:1;
+                                         color:{{ $jobId === $job->value ? '#f0c030' : '#3a4460' }};">
+                                {{ $job->getAbbreviation() }}
+                            </span>
+                            @if($charLv)
+                                <span style="font-family:'Share Tech Mono',monospace;font-size:0.4rem;line-height:1;
+                                             color:{{ $jobId === $job->value ? '#00cc66' : '#1a3a28' }};">
+                                    {{ $charLv }}
+                                </span>
+                            @endif
+                        </button>
+                        @endif
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 
@@ -202,7 +257,8 @@
                 </span>
                 <div style="height:1px;flex:1;background:#252560;"></div>
             </div>
-            <input type="number" wire:model="minProfit" min="0" step="1000"
+            <input type="number" wire:model="minProfit" id="filter-min-profit"
+                   aria-label="Lucro mínimo (gil)" min="0" step="1000"
                    placeholder="5000"
                    style="background:rgba(4,4,14,0.95);border:1px solid #252560;color:#ccd4f0;
                           padding:0.42rem 0.6rem;font-size:0.82rem;border-radius:0;width:100%;
@@ -218,7 +274,8 @@
                 </span>
                 <div style="height:1px;flex:1;background:#252560;"></div>
             </div>
-            <input type="number" wire:model="minMargin" min="0" max="100" step="5"
+            <input type="number" wire:model="minMargin" id="filter-min-margin"
+                   aria-label="Margem mínima (%)" min="0" max="100" step="5"
                    placeholder="20"
                    style="background:rgba(4,4,14,0.95);border:1px solid #252560;color:#ccd4f0;
                           padding:0.42rem 0.6rem;font-size:0.82rem;border-radius:0;width:100%;
@@ -232,7 +289,8 @@
                 <span class="ff-label" style="font-size:0.48rem;color:#3a4870;letter-spacing:0.18em;">VENDAS/SEM</span>
                 <div style="height:1px;flex:1;background:#252560;"></div>
             </div>
-            <input type="number" wire:model="minSales" min="0" step="1"
+            <input type="number" wire:model="minSales" id="filter-min-sales"
+                   aria-label="Vendas por semana mínimas" min="0" step="1"
                    placeholder="5"
                    style="background:rgba(4,4,14,0.95);border:1px solid #252560;color:#ccd4f0;
                           padding:0.42rem 0.6rem;font-size:0.82rem;border-radius:0;width:100%;
@@ -246,7 +304,7 @@
                 class="w-full flex items-center justify-between px-6 py-2.5"
                 style="background:none;border:none;cursor:pointer;">
             <div class="flex items-center gap-2">
-                <span style="font-size:0.55rem;color:#2a3050;transition:transform 200ms;"
+                <span style="font-size:0.55rem;color:var(--hi);transition:transform 200ms;"
                       :style="open ? 'transform:rotate(90deg)' : ''">▸</span>
                 <span class="ff-label" style="font-size:0.48rem;color:#2a3870;letter-spacing:0.18em;">
                     MÉTRICAS AVANÇADAS
@@ -263,7 +321,8 @@
                     <span class="ff-label" style="font-size:0.48rem;color:#3a4870;letter-spacing:0.18em;">CUSTO DOS MATERIAIS</span>
                     <div style="height:1px;flex:1;background:#252560;"></div>
                 </div>
-                <select wire:model="costMetric"
+                <select wire:model="costMetric" id="filter-cost-metric"
+                        aria-label="Custo dos Materiais"
                         style="background:rgba(4,4,14,0.95);border:1px solid #252560;color:#ccd4f0;
                                padding:0.42rem 0.6rem;font-size:0.82rem;width:100%;border-radius:0;">
                     @foreach($costMetrics as $metric)
@@ -277,7 +336,8 @@
                     <span class="ff-label" style="font-size:0.48rem;color:#3a4870;letter-spacing:0.18em;">RECEITA DO ITEM</span>
                     <div style="height:1px;flex:1;background:#252560;"></div>
                 </div>
-                <select wire:model="revMetric"
+                <select wire:model="revMetric" id="filter-rev-metric"
+                        aria-label="Receita do Item"
                         style="background:rgba(4,4,14,0.95);border:1px solid #252560;color:#ccd4f0;
                                padding:0.42rem 0.6rem;font-size:0.82rem;width:100%;border-radius:0;">
                     @foreach($revMetrics as $metric)
@@ -288,7 +348,8 @@
         </div>
     </div>
 
-    {{-- ── Toggle: apenas coletáveis ── --}}
+    {{-- ── Toggle: apenas coletáveis (só faz sentido no modo craft) ── --}}
+    @if($analysisMode !== 'gathering')
     <div class="flex items-center gap-3 px-6 pb-4">
         <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none;">
             <input type="checkbox" wire:model="gatherableOnly"
@@ -298,6 +359,7 @@
             </span>
         </label>
     </div>
+    @endif
 
     {{-- ── Actions ── --}}
     <div class="flex items-center gap-5 px-6 py-4" style="border-top:1px solid #1e1e3a;">
@@ -338,15 +400,14 @@
     <div class="atb-track">
         <div class="atb-fill"></div>
     </div>
-    <div class="mt-4 space-y-2.5">
+    <div class="mt-4 space-y-2.5 overflow-hidden">
         @for($i = 0; $i < 6; $i++)
-            <div class="flex items-center gap-4">
-                <div class="ff-skeleton" style="width:20px;height:20px;flex-shrink:0;"></div>
-                <div class="ff-skeleton h-3 flex-1 max-w-[200px]"></div>
-                <div class="ff-skeleton h-3 w-16 ml-auto"></div>
-                <div class="ff-skeleton h-3 w-16"></div>
-                <div class="ff-skeleton h-3 w-12"></div>
-                <div class="ff-skeleton h-3 w-10"></div>
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="ff-skeleton flex-shrink-0" style="width:20px;height:20px;"></div>
+                <div class="ff-skeleton h-3 flex-1"></div>
+                <div class="ff-skeleton h-3 w-16 flex-shrink-0 hidden sm:block"></div>
+                <div class="ff-skeleton h-3 w-16 flex-shrink-0 hidden md:block"></div>
+                <div class="ff-skeleton h-3 w-12 flex-shrink-0"></div>
             </div>
         @endfor
     </div>
@@ -366,7 +427,7 @@
                 <span class="ff-badge-neutral" style="font-size:0.65rem;">{{ $pagedResults->total() }}</span>
             </div>
             @if($pagedResults->hasPages())
-                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                     {{ $pagedResults->currentPage() }} / {{ $pagedResults->lastPage() }}
                 </span>
             @endif
@@ -391,7 +452,7 @@
                                 <span style="font-size:0.55rem;opacity:{{ $sortColumn === 'itemName' ? '1' : '0.35' }};">{{ $sortIcon('itemName') }}</span>
                             </span>
                         </th>
-                        <th scope="col" class="text-left hidden lg:table-cell" style="width:5rem;">Jobs</th>
+                        <th scope="col" class="text-left hidden lg:table-cell" style="width:5rem;">Fonte</th>
                         <th scope="col" class="text-right cursor-pointer select-none"
                             wire:click="sortBy('profit')"
                             style="{{ $sortColumn === 'profit' ? $thActive : $thBase }}">
@@ -444,16 +505,22 @@
                             <td class="font-medium max-w-[200px]">
                                 <div class="flex items-center gap-2" title="{{ $result['itemName'] }}">
                                     @if(!empty($result['itemIcon']))
-                                        <img src="https://xivapi.com{{ $result['itemIcon'] }}"
+                                        <img src="{{ $result['itemIcon'] }}"
                                              alt="" width="20" height="20"
                                              style="flex-shrink:0;image-rendering:pixelated;opacity:0.9;"
-                                             loading="lazy">
+                                             loading="lazy"
+                                             onerror="this.style.display='none'">
                                     @endif
                                     <div class="min-w-0">
                                         <span class="block truncate" style="color:#ccd4f0;">
                                             {{ $result['itemName'] }}
                                         </span>
-                                        @if(!empty($result['allMatsGatherable']))
+                                        @if(($result['sourceType'] ?? 'craft') === 'gathering')
+                                            <span style="font-family:'Share Tech Mono',monospace;font-size:0.45rem;
+                                                         color:#007a33;letter-spacing:0.05em;">
+                                                ⛏ venda direta
+                                            </span>
+                                        @elseif(!empty($result['allMatsGatherable']))
                                             <span style="font-family:'Share Tech Mono',monospace;font-size:0.45rem;
                                                          color:#00aa55;letter-spacing:0.05em;">
                                                 ⛏ mats coletáveis
@@ -463,7 +530,19 @@
                                 </div>
                             </td>
                             <td class="hidden lg:table-cell">
-                                @if(!empty($result['craftJobs']))
+                                @if(($result['sourceType'] ?? 'craft') === 'gathering')
+                                    @php
+                                        $isFish = ($result['gatheringSource'] ?? '') === 'fishing';
+                                    @endphp
+                                    <span style="font-family:'Share Tech Mono',monospace;
+                                                 font-size:0.42rem;letter-spacing:0.03em;white-space:nowrap;
+                                                 padding:2px 5px;border:1px solid;
+                                                 color:{{ $isFish ? '#5599ff' : '#00dd77' }};
+                                                 border-color:{{ $isFish ? 'rgba(85,153,255,0.4)' : 'rgba(0,221,119,0.35)' }};
+                                                 background:{{ $isFish ? 'rgba(85,153,255,0.06)' : 'rgba(0,50,25,0.4)' }};">
+                                        {{ $isFish ? '🎣 FSH' : '⛏ MIN/BTN' }}
+                                    </span>
+                                @elseif(!empty($result['craftJobs']))
                                     <div class="flex flex-wrap gap-0.5">
                                         @foreach($result['craftJobs'] as $job)
                                             <span style="font-family:'Share Tech Mono',monospace;
@@ -484,15 +563,22 @@
                                 </span>
                             </td>
                             <td class="text-right hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#4a5470;font-size:0.78rem;">
-                                {{ number_format($result['costEstimate']) }}
+                                style="color:var(--dim);font-size:0.78rem;">
+                                @if(($result['sourceType'] ?? 'craft') === 'gathering')
+                                    <span style="color:#2a3a28;font-size:0.7rem;">coleta</span>
+                                @else
+                                    {{ number_format($result['costEstimate']) }}
+                                @endif
                             </td>
                             <td class="text-right hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#4a5470;font-size:0.78rem;">
+                                style="color:var(--dim);font-size:0.78rem;">
                                 {{ number_format($result['revenueEstimate']) }}
                             </td>
                             <td class="text-right whitespace-nowrap">
-                                @if($highMargin)
+                                @if(($result['sourceType'] ?? 'craft') === 'gathering')
+                                    <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;
+                                                 color:#2a3a28;">—</span>
+                                @elseif($highMargin)
                                     <span class="ff-badge-profit">{{ number_format($result['marginPercent'], 1) }}%</span>
                                 @elseif($result['marginPercent'] > 0)
                                     <span class="ff-badge-warn">{{ number_format($result['marginPercent'], 1) }}%</span>
@@ -501,7 +587,7 @@
                                 @endif
                             </td>
                             <td class="text-right hidden sm:table-cell whitespace-nowrap ff-num"
-                                style="color:#4a5470;font-size:0.75rem;">
+                                style="color:var(--dim);font-size:0.75rem;">
                                 {{ number_format($result['salesPerWeek'], 1) }}/sem
                             </td>
                         </tr>
@@ -514,14 +600,14 @@
             <div class="flex items-center justify-between px-5 py-3.5"
                  style="border-top:1px solid #252560;">
                 <button wire:click="prevPage" @disabled($pagedResults->onFirstPage())
-                        class="ff-btn-ghost" aria-label="Página anterior">
+                        class="ff-btn-ghost ff-touch" aria-label="Página anterior">
                     ◄ Anterior
                 </button>
-                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                     {{ $pagedResults->currentPage() }} / {{ $pagedResults->lastPage() }}
                 </span>
                 <button wire:click="nextPage" @disabled(!$pagedResults->hasMorePages())
-                        class="ff-btn-ghost" aria-label="Próxima página">
+                        class="ff-btn-ghost ff-touch" aria-label="Próxima página">
                     Próxima ►
                 </button>
             </div>
@@ -532,7 +618,7 @@
     <div class="ff-box p-12 text-center" wire:loading.remove wire:target="runAnalysis">
         <div style="font-size:2.5rem;margin-bottom:1rem;opacity:0.35;" aria-hidden="true">◇</div>
         <p class="ff-label" style="color:#5a6080;font-size:0.7rem;">Nenhuma oportunidade encontrada</p>
-        <p style="font-size:0.75rem;color:#3a4060;margin-top:0.5rem;">
+        <p style="font-size:0.75rem;color:var(--dim);margin-top:0.5rem;">
             Tente reduzir o lucro mínimo ou remover o filtro de vendas/semana.
         </p>
     </div>

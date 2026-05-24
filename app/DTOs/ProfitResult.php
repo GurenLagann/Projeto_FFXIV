@@ -17,6 +17,8 @@ readonly class ProfitResult implements \JsonSerializable
         public bool    $isProfitable,
         public array   $craftJobs          = [],   // ['BSM', 'ARM', ...]
         public bool    $allMatsGatherable  = false,
+        public string  $sourceType         = 'craft',     // 'craft' | 'gathering'
+        public ?string $gatheringSource    = null,         // 'gathering' (MIN/BTN) | 'fishing' (FSH)
     ) {}
 
     public function jsonSerialize(): array

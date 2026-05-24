@@ -192,7 +192,7 @@
                 <span class="ff-badge-neutral" style="font-size:0.65rem;">{{ $recipes->total() }}</span>
             </div>
             @if($recipes->hasPages())
-                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                     {{ $recipes->currentPage() }} / {{ $recipes->lastPage() }}
                 </span>
             @endif
@@ -268,11 +268,12 @@
                             {{-- Item --}}
                             <td class="font-medium">
                                 <div class="flex items-center gap-2" title="{{ $recipe->item->name ?? '—' }}">
-                                    @if(!empty($recipe->item->icon))
-                                        <img src="https://xivapi.com{{ $recipe->item->icon }}"
+                                    @if($recipe->item?->iconUrl)
+                                        <img src="{{ $recipe->item->iconUrl }}"
                                              alt="" width="20" height="20"
                                              style="flex-shrink:0;image-rendering:pixelated;opacity:0.9;"
-                                             loading="lazy">
+                                             loading="lazy"
+                                             onerror="this.style.display='none'">
                                     @endif
                                     <span class="truncate block max-w-[180px] md:max-w-[300px]"
                                           style="color:#ccd4f0;">
@@ -313,7 +314,7 @@
 
                             {{-- Yields --}}
                             <td class="text-center hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#4a5470;font-size:0.78rem;">
+                                style="color:var(--dim);font-size:0.78rem;">
                                 ×{{ $recipe->yields }}
                             </td>
 
@@ -473,17 +474,18 @@
                                                         <tr style="border-bottom:1px solid rgba(37,37,96,0.2);">
                                                             <td style="padding:0.45rem 0.5rem 0.45rem 0;">
                                                                 <div class="flex items-center gap-1.5">
-                                                                    @if(!empty($mat->icon))
-                                                                        <img src="https://xivapi.com{{ $mat->icon }}"
+                                                                    @if($mat->iconUrl)
+                                                                        <img src="{{ $mat->iconUrl }}"
                                                                              alt="" width="16" height="16"
                                                                              style="flex-shrink:0;image-rendering:pixelated;opacity:0.8;"
-                                                                             loading="lazy">
+                                                                             loading="lazy"
+                                                                             onerror="this.style.display='none'">
                                                                     @endif
                                                                     <span style="font-size:0.8rem;color:#9aa8c8;">{{ $mat->name }}</span>
                                                                 </div>
                                                             </td>
                                                             <td style="text-align:center;padding:0.45rem 0.5rem;">
-                                                                <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#4a5470;">
+                                                                <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--dim);">
                                                                     ×{{ $mat->pivot->quantity }}
                                                                 </span>
                                                             </td>
@@ -507,7 +509,7 @@
                                                                                  border:1px solid rgba(240,192,48,0.2);background:rgba(40,30,0,0.4);
                                                                                  padding:0.1rem 0.4rem;white-space:nowrap;">⚒ craftável</span>
                                                                 @else
-                                                                    <span style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:#4a5470;
+                                                                    <span style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:var(--dim);
                                                                                  border:1px solid rgba(74,84,112,0.3);background:rgba(10,10,25,0.4);
                                                                                  padding:0.1rem 0.4rem;white-space:nowrap;">🏪 mercado</span>
                                                                 @endif
@@ -631,7 +633,7 @@
                         class="ff-btn-ghost" aria-label="Página anterior">
                     ◄ Anterior
                 </button>
-                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                     {{ $recipes->currentPage() }} / {{ $recipes->lastPage() }}
                 </span>
                 <button wire:click="nextPage" @disabled(!$recipes->hasMorePages())
@@ -646,7 +648,7 @@
     <div class="ff-box p-12 text-center">
         <div style="font-size:2.5rem;margin-bottom:1rem;opacity:0.35;" aria-hidden="true">◇</div>
         <p class="ff-label" style="color:#5a6080;font-size:0.7rem;">Nenhuma receita encontrada</p>
-        <p style="font-size:0.75rem;color:#3a4060;margin-top:0.5rem;">
+        <p style="font-size:0.75rem;color:var(--dim);margin-top:0.5rem;">
             Ajuste os filtros ou sincronize as receitas com
             <span style="font-family:'Share Tech Mono',monospace;color:#2a3870;">market:sync:items</span>.
         </p>

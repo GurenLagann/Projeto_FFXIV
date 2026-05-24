@@ -8,6 +8,7 @@ use App\DTOs\ProfitResult;
 use App\Enums\CostMetric;
 use App\Enums\RevenueMetric;
 use App\Models\Analysis;
+use App\Models\GatheringItem;
 use App\Models\Recipe;
 use App\Models\Server;
 
@@ -92,6 +93,78 @@ class MarketAnalyzerService
         });
 
         usort($results, fn(ProfitResult $a, ProfitResult $b) => $b->profit <=> $a->profit);
+
+        return array_slice($results, 0, $limit);
+    }
+
+    /**
+     * Analisa itens coletáveis (MIN/BTN/FSH) como oportunidades de venda direta.
+     * Custo = 0 (coletados in-game), lucro = preço de mercado.
+     */
+    public function analyzeGathering(string $server, array $filters = []): array
+    {
+        $revenueMetric = RevenueMetric::tryFrom($filters['revenue_metric'] ?? '') ?? RevenueMetric::HOME_MIN_LISTING;
+        $revenueField  = $revenueMetric->getUniversalisField();
+
+        $query = GatheringItem::with('item:id,name,icon')
+            ->whereHas('item');
+
+        if (!empty($filters['min_level'])) {
+            $query->where('gathering_level', '>=', $filters['min_level']);
+        }
+        if (!empty($filters['max_level'])) {
+            $query->where('gathering_level', '<=', $filters['max_level']);
+        }
+        if (!empty($filters['gathering_source'])) {
+            $query->where('source', $filters['gathering_source']);
+        }
+
+        $limit   = (int) ($filters['limit'] ?? config('market.analysis.max_results', 1000));
+        $results = [];
+
+        $query->chunk(300, function ($gatheringItems) use ($server, $filters, $revenueField, &$results) {
+            $itemIds = $gatheringItems->pluck('item_id')->map(fn($id) => (int) $id)->unique()->values()->all();
+            $prices  = $this->universalis->getPrices($server, $itemIds);
+
+            foreach ($gatheringItems as $gi) {
+                $price = $prices[(int) $gi->item_id] ?? null;
+                if (!$price) {
+                    continue;
+                }
+
+                $revenue = (int) $price->getFieldValue($revenueField);
+                if ($revenue <= 0) {
+                    continue;
+                }
+
+                // Custo = 0, lucro = receita da venda
+                if (!empty($filters['min_profit']) && $revenue < $filters['min_profit']) {
+                    continue;
+                }
+                if (!empty($filters['min_sales']) && $price->salesPerWeek < $filters['min_sales']) {
+                    continue;
+                }
+
+                $results[] = new ProfitResult(
+                    itemId:            (int) $gi->item_id,
+                    itemName:          $gi->item->name ?? "Item #{$gi->item_id}",
+                    itemIcon:          $gi->item->iconUrl ?? null,
+                    profit:            $revenue,
+                    costEstimate:      0,
+                    revenueEstimate:   $revenue,
+                    yieldsPerCraft:    1,
+                    salesPerWeek:      $price->salesPerWeek,
+                    marginPercent:     100.0,
+                    isProfitable:      true,
+                    craftJobs:         [],
+                    allMatsGatherable: false,
+                    sourceType:        'gathering',
+                    gatheringSource:   $gi->source,
+                );
+            }
+        });
+
+        usort($results, fn($a, $b) => $b->profit <=> $a->profit);
 
         return array_slice($results, 0, $limit);
     }

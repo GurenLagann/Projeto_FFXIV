@@ -9,7 +9,7 @@
     <div>
         <p class="ff-label mb-1" style="font-size:0.55rem;letter-spacing:0.2em;color:#2e3a60;">✦ &nbsp; REGISTROS DE BATALHA</p>
         <h1 class="ff-title text-2xl">Histórico de Análises</h1>
-        <p class="mt-1.5" style="font-size:0.78rem;color:#4a5470;">
+        <p class="mt-1.5" style="font-size:0.78rem;color:var(--dim);">
             {{ $analyses->total() }} análise{{ $analyses->total() !== 1 ? 's' : '' }} registrada{{ $analyses->total() !== 1 ? 's' : '' }}
         </p>
     </div>
@@ -23,8 +23,8 @@
     @if($analyses->isEmpty())
         <div class="p-14 text-center">
             <div style="font-size:3rem;color:#252560;margin-bottom:1rem;" aria-hidden="true">◇</div>
-            <p class="ff-label" style="color:#3a4060;font-size:0.65rem;">Nenhuma análise registrada</p>
-            <p style="font-size:0.75rem;color:#2a3050;margin-top:0.4rem;margin-bottom:1.2rem;">
+            <p class="ff-label" style="font-size:0.65rem;">Nenhuma análise registrada</p>
+            <p style="font-size:0.75rem;color:var(--dim);margin-top:0.4rem;margin-bottom:1.2rem;">
                 Execute sua primeira análise no dashboard.
             </p>
             <a href="{{ route('market.dashboard') }}" class="ff-btn-ghost" style="display:inline-flex;">
@@ -103,7 +103,7 @@
 
                                     @if($showLevel)
                                         <span style="font-family:'Share Tech Mono',monospace;font-size:0.52rem;
-                                                     color:#4a5470;border:1px solid #1e1e40;padding:0.1rem 0.4rem;">
+                                                     color:var(--dim);border:1px solid #1e1e40;padding:0.1rem 0.4rem;">
                                             Lv.{{ $minLv ?? 1 }}–{{ $maxLv ?? 100 }}
                                         </span>
                                     @endif
@@ -149,7 +149,7 @@
 
                             {{-- Duração --}}
                             <td class="text-right hidden sm:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.72rem;">
+                                style="color:var(--dim);font-size:0.72rem;">
                                 @if($analysis->execution_time)
                                     @if($analysis->execution_time >= 1000)
                                         {{ number_format($analysis->execution_time / 1000, 1) }}s
@@ -164,7 +164,7 @@
                             {{-- Data --}}
                             <td class="text-right hidden md:table-cell whitespace-nowrap"
                                 title="{{ $analysis->created_at->format('d/m/Y H:i:s') }}">
-                                <span class="ff-num" style="color:#4a5470;font-size:0.72rem;">
+                                <span class="ff-num" style="color:var(--dim);font-size:0.72rem;">
                                     {{ $analysis->created_at->diffForHumans() }}
                                 </span>
                             </td>
@@ -199,23 +199,23 @@
             <div class="flex items-center justify-between px-5 py-3.5"
                  style="border-top:1px solid #252560;">
                 @if($analyses->onFirstPage())
-                    <button class="ff-btn-ghost" disabled aria-label="Página anterior">◄ Anterior</button>
+                    <button class="ff-btn-ghost ff-touch" disabled aria-label="Página anterior">◄ Anterior</button>
                 @else
-                    <a href="{{ $analyses->previousPageUrl() }}" class="ff-btn-ghost" aria-label="Página anterior">
+                    <a href="{{ $analyses->previousPageUrl() }}" class="ff-btn-ghost ff-touch" aria-label="Página anterior">
                         ◄ Anterior
                     </a>
                 @endif
 
-                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                     {{ $analyses->currentPage() }} / {{ $analyses->lastPage() }}
                 </span>
 
                 @if($analyses->hasMorePages())
-                    <a href="{{ $analyses->nextPageUrl() }}" class="ff-btn-ghost" aria-label="Próxima página">
+                    <a href="{{ $analyses->nextPageUrl() }}" class="ff-btn-ghost ff-touch" aria-label="Próxima página">
                         Próxima ►
                     </a>
                 @else
-                    <button class="ff-btn-ghost" disabled aria-label="Próxima página">Próxima ►</button>
+                    <button class="ff-btn-ghost ff-touch" disabled aria-label="Próxima página">Próxima ►</button>
                 @endif
             </div>
         @endif

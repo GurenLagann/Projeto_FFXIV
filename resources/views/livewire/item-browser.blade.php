@@ -117,17 +117,32 @@
             <div>
                 <label class="ff-label block mb-1.5">Fonte</label>
                 <div class="flex gap-1.5">
-                    @foreach([null => 'Todos', 'gathering' => 'MIN / BTN', 'fishing' => 'FSH'] as $val => $label)
-                        <button wire:click="toggleSource({{ $val === null ? 'null' : "'$val'" }})"
-                                class="px-3 py-1 ff-label border transition-colors
-                                       {{ $source === $val
-                                           ? ($val === 'fishing'
-                                               ? 'border-[var(--crystal)] text-[var(--crystal)] bg-[rgba(85,153,255,0.08)]'
-                                               : 'border-[var(--mako)] text-[var(--mako)] bg-[rgba(0,221,119,0.06)]')
-                                           : 'border-[var(--border)] text-[var(--dim)] hover:border-[var(--hi)] hover:text-[var(--text)]' }}">
-                            {{ $label }}
-                        </button>
-                    @endforeach
+                    {{-- Todos --}}
+                    <button wire:click="toggleSource(null)"
+                            class="px-3 py-1 ff-label border transition-colors
+                                   {{ $source === null
+                                       ? 'border-[var(--hi)] text-[var(--text)] bg-[rgba(255,255,255,0.05)]'
+                                       : 'border-[var(--border)] text-[var(--dim)] hover:border-[var(--hi)] hover:text-[var(--text)]' }}">
+                        Todos
+                    </button>
+
+                    {{-- Mineração / Botânica --}}
+                    <button wire:click="toggleSource('gathering')"
+                            class="px-3 py-1 ff-label border transition-colors
+                                   {{ $source === 'gathering'
+                                       ? 'border-[var(--mako)] text-[var(--mako)] bg-[rgba(0,221,119,0.06)]'
+                                       : 'border-[var(--border)] text-[var(--dim)] hover:border-[var(--hi)] hover:text-[var(--text)]' }}">
+                        ⛏ MIN / BTN
+                    </button>
+
+                    {{-- Pesca --}}
+                    <button wire:click="toggleSource('fishing')"
+                            class="px-3 py-1 ff-label border transition-colors
+                                   {{ $source === 'fishing'
+                                       ? 'border-[var(--crystal)] text-[var(--crystal)] bg-[rgba(85,153,255,0.08)]'
+                                       : 'border-[var(--border)] text-[var(--dim)] hover:border-[var(--hi)] hover:text-[var(--text)]' }}">
+                        🎣 FSH
+                    </button>
                 </div>
             </div>
         @endif
@@ -162,7 +177,6 @@
             <table class="ff-table w-full">
                 <thead>
                     <tr>
-                        <th class="text-left w-8"></th>
                         <th class="text-left {{ $thClass }}"
                             wire:click="sortBy('name')"
                             style="{{ $sortColumn === 'name' ? $thA : $thB }}">
@@ -194,6 +208,7 @@
                             <th class="text-right">Mediana NQ</th>
                             <th class="text-right">Vendas/sem</th>
                             <th class="text-right">Atualizado</th>
+                            <th class="w-8"></th>
                         @endif
                     </tr>
                 </thead>
@@ -204,19 +219,17 @@
                             $lookup  = $item->recipeLookup;
                             $abbrs   = $lookup?->getJobAbbreviations() ?? [];
                             $price   = $prices[(int)$item->id] ?? null;
-                            $iconUrl = $item->icon
-                                ? (str_starts_with($item->icon, 'http') ? $item->icon : 'https://xivapi.com' . $item->icon)
-                                : null;
+                            $iconUrl = $item->iconUrl;
                         @endphp
                         <tr>
-                            <td class="w-8 pr-0">
-                                @if($iconUrl)
-                                    <img src="{{ $iconUrl }}" alt="" class="w-7 h-7 object-contain" loading="lazy"
-                                         onerror="this.style.display='none'">
-                                @endif
-                            </td>
                             <td>
-                                <span class="text-[var(--text)] font-medium text-sm">{{ $item->name }}</span>
+                                <div class="flex items-center gap-2">
+                                    @if($iconUrl)
+                                        <img src="{{ $iconUrl }}" alt="" class="w-8 h-8 object-contain flex-shrink-0" loading="lazy"
+                                             onerror="this.style.display='none'">
+                                    @endif
+                                    <span class="text-[var(--text)] font-medium text-sm">{{ $item->name }}</span>
+                                </div>
                             </td>
                             <td>
                                 <div class="flex flex-wrap gap-1">
@@ -274,11 +287,21 @@
                                         —
                                     @endif
                                 </td>
+                                <td class="w-8 text-center">
+                                    <button wire:click="refreshPrice({{ $item->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="refreshPrice({{ $item->id }})"
+                                            title="Atualizar preço deste item"
+                                            class="text-[var(--dim)] hover:text-[var(--crystal)] transition-colors disabled:opacity-40 disabled:cursor-wait">
+                                        <span wire:loading.remove wire:target="refreshPrice({{ $item->id }})" style="font-size:0.85rem;">↻</span>
+                                        <span wire:loading wire:target="refreshPrice({{ $item->id }})" style="font-size:0.85rem;" class="inline-block animate-spin">↻</span>
+                                    </button>
+                                </td>
                             @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $serverId ? 10 : 6 }}" class="text-center py-12 text-[var(--dim)] ff-label">
+                            <td colspan="{{ $serverId ? 10 : 5 }}" class="text-center py-12 text-[var(--dim)] ff-label">
                                 Nenhum item encontrado com os filtros selecionados
                             </td>
                         </tr>
@@ -290,7 +313,6 @@
             <table class="ff-table w-full">
                 <thead>
                     <tr>
-                        <th class="text-left w-8"></th>
                         <th class="text-left {{ $thClass }}"
                             wire:click="sortBy('name')"
                             style="{{ $sortColumn === 'name' ? $thA : $thB }}">
@@ -321,6 +343,7 @@
                             <th class="text-right">Mediana NQ</th>
                             <th class="text-right">Vendas/sem</th>
                             <th class="text-right">Atualizado</th>
+                            <th class="w-8"></th>
                         @endif
                     </tr>
                 </thead>
@@ -329,19 +352,17 @@
                         @php
                             $gi      = $item->gatheringItem;
                             $price   = $prices[(int)$item->id] ?? null;
-                            $iconUrl = $item->icon
-                                ? (str_starts_with($item->icon, 'http') ? $item->icon : 'https://xivapi.com' . $item->icon)
-                                : null;
+                            $iconUrl = $item->iconUrl;
                         @endphp
                         <tr>
-                            <td class="w-8 pr-0">
-                                @if($iconUrl)
-                                    <img src="{{ $iconUrl }}" alt="" class="w-7 h-7 object-contain" loading="lazy"
-                                         onerror="this.style.display='none'">
-                                @endif
-                            </td>
                             <td>
-                                <span class="text-[var(--text)] font-medium text-sm">{{ $item->name }}</span>
+                                <div class="flex items-center gap-2">
+                                    @if($iconUrl)
+                                        <img src="{{ $iconUrl }}" alt="" class="w-8 h-8 object-contain flex-shrink-0" loading="lazy"
+                                             onerror="this.style.display='none'">
+                                    @endif
+                                    <span class="text-[var(--text)] font-medium text-sm">{{ $item->name }}</span>
+                                </div>
                             </td>
                             <td class="text-center">
                                 @if($gi)
@@ -393,11 +414,21 @@
                                         —
                                     @endif
                                 </td>
+                                <td class="w-8 text-center">
+                                    <button wire:click="refreshPrice({{ $item->id }})"
+                                            wire:loading.attr="disabled"
+                                            wire:target="refreshPrice({{ $item->id }})"
+                                            title="Atualizar preço deste item"
+                                            class="text-[var(--dim)] hover:text-[var(--crystal)] transition-colors disabled:opacity-40 disabled:cursor-wait">
+                                        <span wire:loading.remove wire:target="refreshPrice({{ $item->id }})" style="font-size:0.85rem;">↻</span>
+                                        <span wire:loading wire:target="refreshPrice({{ $item->id }})" style="font-size:0.85rem;" class="inline-block animate-spin">↻</span>
+                                    </button>
+                                </td>
                             @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $serverId ? 9 : 5 }}" class="text-center py-12 text-[var(--dim)] ff-label">
+                            <td colspan="{{ $serverId ? 9 : 4 }}" class="text-center py-12 text-[var(--dim)] ff-label">
                                 Nenhum item encontrado com os filtros selecionados
                             </td>
                         </tr>

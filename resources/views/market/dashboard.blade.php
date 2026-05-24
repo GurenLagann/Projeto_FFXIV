@@ -11,7 +11,7 @@
             ✦ &nbsp; EORZEA MARKET BOARD
         </p>
         <h1 class="ff-title text-3xl">Market Analyzer</h1>
-        <p class="mt-1.5" style="font-size:0.8rem;color:#4a5470;">
+        <p class="mt-1.5" style="font-size:0.8rem;color:var(--dim);">
             Lucratividade de crafting em tempo real via Universalis & XIVAPI.
         </p>
     </div>
@@ -28,7 +28,7 @@
         : 0;
 @endphp
 
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
 
     {{-- Servers --}}
     <div class="ff-box ff-card-hover p-5">
@@ -100,7 +100,7 @@
 <div class="mt-10">
     <div class="flex items-center gap-3 mb-3">
         <span style="color:#4040a0;font-size:0.6rem;" aria-hidden="true">◆</span>
-        <h2 class="ff-label" style="font-size:0.6rem;color:#4a5470;letter-spacing:0.2em;">Análises Recentes</h2>
+        <h2 class="ff-label" style="font-size:0.6rem;letter-spacing:0.2em;">Análises Recentes</h2>
     </div>
 
     <div class="ff-box overflow-hidden">
@@ -128,10 +128,10 @@
                                 <span class="ff-badge-neutral">0</span>
                             @endif
                         </td>
-                        <td class="text-right ff-num hidden sm:table-cell" style="color:#3a4060;font-size:0.75rem;">
+                        <td class="text-right ff-num hidden sm:table-cell" style="color:var(--dim);font-size:0.75rem;">
                             {{ number_format($analysis->execution_time ?? 0) }} ms
                         </td>
-                        <td class="text-right ff-num" style="color:#4a5470;font-size:0.75rem;">
+                        <td class="text-right ff-num" style="color:var(--dim);font-size:0.75rem;">
                             {{ $analysis->created_at->diffForHumans() }}
                         </td>
                         <td class="text-right">
@@ -153,6 +153,8 @@
 @endsection
 
 @push('scripts')
+{{-- Chart.js: loaded only on this page, not globally --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('profitChart');
@@ -201,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scales: {
                 x: {
                     ticks: {
-                        color: '#3a4060',
+                        color: '#7280a0',
                         font: { size: 10 },
                         maxRotation: 30
                     },
@@ -210,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 y: {
                     ticks: {
-                        color: '#3a4060',
+                        color: '#7280a0',
                         font: { family: 'Share Tech Mono, monospace', size: 10 },
                         callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M g'
                                      : v >= 1e3 ? (v/1e3).toFixed(0)+'k g'

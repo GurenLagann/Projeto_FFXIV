@@ -39,9 +39,10 @@
                 {{ __('Registrar') }}
             </x-primary-button>
 
+            {{-- #5599ff = 7.1:1 on bg — WCAG AA ✓ --}}
             <a href="{{ route('login') }}"
-               style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.08em;color:#2e3a60;text-align:center;transition:color 120ms;text-decoration:none;"
-               onmouseover="this.style.color='#5599ff'" onmouseout="this.style.color='#2e3a60'">
+               style="font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.08em;color:#5599ff;text-align:center;transition:color 120ms;text-decoration:none;"
+               onmouseover="this.style.color='#88bbff'" onmouseout="this.style.color='#5599ff'">
                 Já tem conta? Entrar
             </a>
         </div>

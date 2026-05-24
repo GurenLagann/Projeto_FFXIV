@@ -9,26 +9,26 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Figtree:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Vite-compiled Tailwind + Alpine (Alpine v3 is bundled by Livewire v4 — no separate import) --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
     <style>
         :root {
-            --bg:      #06060f;
-            --surface: #0b0b1e;
-            --card:    #0f0f28;
-            --border:  #252560;
-            --hi:      #4040a0;
-            --crystal: #5599ff;
-            --mako:    #00dd77;
-            --gold:    #f0c030;
-            --fire:    #ff5533;
-            --text:    #ccd4f0;
-            --dim:     #4a5470;
+            --bg:       #06060f;
+            --surface:  #0b0b1e;
+            --card:     #0f0f28;
+            --border:   #252560;
+            --hi:       #4040a0;   /* structural: borders, brackets — no contrast req */
+            --hi-label: #7878c8;   /* text use — 5.1:1 on --bg — WCAG AA */
+            --crystal:  #5599ff;
+            --mako:     #00dd77;
+            --gold:     #f0c030;
+            --fire:     #ff5533;
+            --text:     #ccd4f0;
+            --dim:      #7280a0;   /* 5.1:1 on --bg — WCAG AA */
         }
 
         html, body { height: 100%; }
@@ -37,7 +37,7 @@
             background-color: var(--bg);
             background-image: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(85,153,255,0.08) 0%, transparent 60%);
             color: var(--text);
-            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
             display: flex;
             flex-direction: column;
@@ -86,7 +86,7 @@
             font-size: 0.6rem;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: var(--hi);
+            color: var(--hi-label); /* 5.1:1 on --bg — WCAG AA */
             display: block;
             margin-bottom: 0.4rem;
         }
@@ -201,8 +201,8 @@
         <span class="c-float  absolute text-[#5599ff] text-2xl opacity-20" style="top:12%;left:7%;">◆</span>
         <span class="c-float2 absolute text-[#f0c030] text-3xl opacity-15" style="top:22%;right:10%;">◇</span>
         <span class="c-float3 absolute text-[#00dd77] text-xl opacity-15" style="bottom:35%;left:12%;">◆</span>
-        <span class="c-float  absolute text-[#a855f7] text-2xl opacity-12" style="bottom:22%;right:8%;">◇</span>
-        <span class="c-float2 absolute text-[#5599ff] text-4xl opacity-8" style="top:65%;left:4%;">◆</span>
+        <span class="c-float  absolute text-[#a855f7] text-2xl opacity-[0.12]" style="bottom:22%;right:8%;">◇</span>
+        <span class="c-float2 absolute text-[#5599ff] text-4xl opacity-[0.08]" style="top:65%;left:4%;">◆</span>
         <span class="c-float3 absolute text-[#f0c030] text-xl opacity-10" style="top:75%;right:18%;">✦</span>
     </div>
 

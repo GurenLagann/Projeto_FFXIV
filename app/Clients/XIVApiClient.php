@@ -295,7 +295,7 @@ class XIVApiClient
     public function getGatheringPage(int $after = 0, int $limit = 500): array
     {
         $data = $this->v2Get(
-            "/api/sheet/GatheringItem?fields=Item,GatheringItemLevel.GatheringItemLevel,GatheringItemLevel.Stars&limit={$limit}&after={$after}"
+            "/api/sheet/GatheringItem?fields=Item.Name,Item.Icon,Item.LevelItem,GatheringItemLevel.GatheringItemLevel,GatheringItemLevel.Stars&limit={$limit}&after={$after}"
         );
         return $data['rows'] ?? [];
     }
@@ -306,14 +306,14 @@ class XIVApiClient
     public function getFishingPage(int $after = 0, int $limit = 500): array
     {
         $data = $this->v2Get(
-            "/api/sheet/SpearfishingItem?fields=Item,GatheringItemLevel.GatheringItemLevel&limit={$limit}&after={$after}"
+            "/api/sheet/SpearfishingItem?fields=Item.Name,Item.Icon,Item.LevelItem,GatheringItemLevel.GatheringItemLevel&limit={$limit}&after={$after}"
         );
         return $data['rows'] ?? [];
     }
 
     /**
      * Persiste um lote de rows da GatheringItem sheet.
-     * Só insere para item_ids que já existem na tabela items.
+     * Cria o Item no banco se ainda não existir, depois upserta o GatheringItem.
      *
      * @param  array  $rows     Rows vindas de getGatheringPage() ou getFishingPage()
      * @param  string $source   'gathering' | 'fishing'
@@ -325,11 +325,13 @@ class XIVApiClient
             return 0;
         }
 
-        $records = [];
+        $records   = [];
+        $itemUpserts = [];
 
         foreach ($rows as $row) {
-            $fields = $row['fields'] ?? [];
-            $itemId = (string) ($fields['Item']['value'] ?? 0);
+            $fields     = $row['fields'] ?? [];
+            $itemFields = $fields['Item']['fields'] ?? [];
+            $itemId     = (string) ($fields['Item']['value'] ?? 0);
 
             // IsHidden indica nós especiais/timed (ex: Titanium Ore), não que o item
             // seja incoletável — incluímos esses itens normalmente.
@@ -337,12 +339,27 @@ class XIVApiClient
                 continue;
             }
 
-            $level = $fields['GatheringItemLevel']['fields']['GatheringItemLevel'] ?? 0;
-            $stars = $fields['GatheringItemLevel']['fields']['Stars'] ?? 0;
+            $name  = $itemFields['Name'] ?? null;
+            $icon  = $itemFields['Icon']['path'] ?? null;
+            $level = $itemFields['LevelItem']['value'] ?? 0;
+
+            // Prepara upsert do Item para garantir que exista no banco
+            if ($name) {
+                $itemUpserts[] = [
+                    'id'           => $itemId,
+                    'name'         => $name,
+                    'level'        => (int) $level,
+                    'icon'         => $icon ? '/' . ltrim($icon, '/') : null,
+                    'is_craftable' => false,
+                ];
+            }
+
+            $gatheringLevel = $fields['GatheringItemLevel']['fields']['GatheringItemLevel'] ?? 0;
+            $stars          = $fields['GatheringItemLevel']['fields']['Stars'] ?? 0;
 
             $records[$itemId] = [
                 'item_id'         => $itemId,
-                'gathering_level' => (int) $level,
+                'gathering_level' => (int) $gatheringLevel,
                 'stars'           => (int) $stars,
                 'source'          => $source,
             ];
@@ -352,20 +369,21 @@ class XIVApiClient
             return 0;
         }
 
-        // Filtra apenas item_ids que existem na tabela items
-        $existingIds = Item::whereIn('id', array_keys($records))->pluck('id')->all();
-        $filtered    = array_filter($records, fn($r) => in_array($r['item_id'], $existingIds));
-
-        if (empty($filtered)) {
-            return 0;
+        // Garante que todos os itens existam na tabela items antes do FK check
+        if (!empty($itemUpserts)) {
+            Item::upsert(
+                $itemUpserts,
+                ['id'],
+                ['name', 'level', 'icon']  // não sobrescreve is_craftable se já for true
+            );
         }
 
         GatheringItem::upsert(
-            array_values($filtered),
+            array_values($records),
             ['item_id'],
             ['gathering_level', 'stars', 'source', 'updated_at']
         );
 
-        return count($filtered);
+        return count($records);
     }
 }

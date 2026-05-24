@@ -49,7 +49,7 @@ $maxWidth = [
     {{-- Backdrop --}}
     <div
         x-show="show"
-        class="fixed inset-0 transform transition-all"
+        class="fixed inset-0 transform transition-opacity"
         x-on:click="show = false"
         x-transition:enter="ease-out duration-200"
         x-transition:enter-start="opacity-0"
@@ -64,7 +64,7 @@ $maxWidth = [
     {{-- Panel --}}
     <div
         x-show="show"
-        class="mb-6 overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto"
+        class="mb-6 overflow-hidden shadow-xl transform transition-[opacity,transform] sm:w-full {{ $maxWidth }} sm:mx-auto"
         style="box-shadow:0 0 60px rgba(0,0,0,0.9),0 0 0 1px rgba(37,37,96,0.5);"
         x-transition:enter="ease-out duration-200"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"

@@ -16,7 +16,7 @@
                 </span>
             @endif
         </div>
-        <p class="mt-1.5" style="font-size:0.78rem;color:#4a5470;">
+        <p class="mt-1.5" style="font-size:0.78rem;color:var(--dim);">
             <span class="ff-num">{{ $elapsed }}ms</span>
             <span style="color:#252560;margin:0 0.5rem;">◆</span>
             {{ now()->format('d/m/Y H:i') }}
@@ -48,7 +48,7 @@
     <div class="ff-box ff-card-hover p-5">
         <p class="ff-label mb-3" style="font-size:0.55rem;color:#1a2a5a;">Duração</p>
         <p class="ff-num font-bold" style="font-size:1.9rem;color:#5599ff;">
-            {{ number_format($elapsed) }}<span style="font-size:0.9rem;color:#3a4060;margin-left:2px;">ms</span>
+            {{ number_format($elapsed) }}<span style="font-size:0.9rem;color:var(--dim);margin-left:2px;">ms</span>
         </p>
         <div class="mt-3 h-px" style="background:linear-gradient(90deg,#5599ff30,transparent);"></div>
     </div>
@@ -72,7 +72,7 @@
             <span class="ff-badge-neutral" style="font-size:0.65rem;">{{ $results->total() }}</span>
         </div>
         @if($results->hasPages())
-            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                 {{ $results->currentPage() }} / {{ $results->lastPage() }}
             </span>
         @endif
@@ -81,8 +81,8 @@
     @if($results->isEmpty())
         <div class="p-12 text-center">
             <div style="font-size:2.5rem;color:#252560;margin-bottom:1rem;" aria-hidden="true">◇</div>
-            <p class="ff-label" style="color:#3a4060;font-size:0.65rem;">Nenhuma oportunidade encontrada</p>
-            <p style="font-size:0.75rem;color:#2a3050;margin-top:0.4rem;">
+            <p class="ff-label" style="color:var(--dim);font-size:0.65rem;">Nenhuma oportunidade encontrada</p>
+            <p style="font-size:0.75rem;color:var(--dim);margin-top:0.4rem;">
                 Tente reduzir o lucro mínimo ou remover o filtro de vendas/semana.
             </p>
         </div>
@@ -128,11 +128,11 @@
                                 </span>
                             </td>
                             <td class="text-right hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.78rem;">
+                                style="color:var(--dim);font-size:0.78rem;">
                                 {{ number_format($r['costEstimate']) }}
                             </td>
                             <td class="text-right hidden md:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.78rem;">
+                                style="color:var(--dim);font-size:0.78rem;">
                                 {{ number_format($r['revenueEstimate']) }}
                             </td>
                             <td class="text-right whitespace-nowrap">
@@ -145,7 +145,7 @@
                                 @endif
                             </td>
                             <td class="text-right hidden sm:table-cell whitespace-nowrap ff-num"
-                                style="color:#3a4060;font-size:0.75rem;">
+                                style="color:var(--dim);font-size:0.75rem;">
                                 {{ number_format($r['salesPerWeek'], 1) }}/sem
                             </td>
                         </tr>
@@ -162,7 +162,7 @@
                     <a href="{{ $results->previousPageUrl() }}" class="ff-btn-ghost" style="font-size:0.62rem;">◄ Anterior</a>
                 @endif
 
-                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#3a4060;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);">
                     {{ $results->currentPage() }} / {{ $results->lastPage() }}
                 </span>
 
