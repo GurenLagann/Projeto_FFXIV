@@ -11,8 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Figtree:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-    {{-- Vite-compiled Tailwind + Alpine (Alpine v3 is bundled by Livewire v4 — no separate import) --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
     @livewireStyles
 
     <style>

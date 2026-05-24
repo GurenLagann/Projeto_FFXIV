@@ -19,13 +19,13 @@
             <button wire:click="runChecks"
                     wire:loading.attr="disabled"
                     wire:target="runChecks"
-                    class="ff-btn-primary gap-1.5">
+                    class="ff-btn-primary">
                 <span wire:loading.remove wire:target="runChecks"
-                      style="display:inline-flex;align-items:center;gap:0.4rem;">
+                      class="inline-flex items-center gap-1.5">
                     <span style="font-size:1rem;line-height:1;">↻</span> Verificar agora
                 </span>
                 <span wire:loading wire:target="runChecks"
-                      style="display:inline-flex;align-items:center;gap:0.4rem;">
+                      class="inline-flex items-center gap-1.5">
                     <span class="inline-block animate-spin" style="font-size:1rem;line-height:1;">↻</span>
                     Verificando...
                 </span>
