@@ -379,7 +379,7 @@ class ProfitCalculatorTest extends TestCase
 
         $this->assertEquals(99, $result->itemId);
         $this->assertEquals('Test Item', $result->itemName);
-        $this->assertEquals('/icon.png', $result->itemIcon);
+        $this->assertEquals('https://xivapi.com/icon.png', $result->itemIcon);
     }
 
     public function test_json_serialize_includes_all_fields(): void
