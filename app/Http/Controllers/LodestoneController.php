@@ -71,27 +71,28 @@ class LodestoneController extends Controller
         return view('lodestone.verify', compact('code', 'character'));
     }
 
-    public function confirm(Request $request)
+    public function confirm(Request $request, LodestoneClient $lodestone)
     {
         $request->validate([
-            'lodestone_id'    => 'required|integer',
-            'character_name'  => 'required|string',
-            'character_server'=> 'required|string',
-            'character_avatar'=> 'nullable|string',
+            'lodestone_id' => 'required|integer|min:1|max:99999999',
         ]);
 
+        $id   = (int) $request->lodestone_id;
+        $info = $lodestone->getCharacterInfo($id);
+
         $code = 'FFXIV-' . strtoupper(Str::random(8));
+        $name = $info['Name'] ?? "Personagem #{$id}";
 
         $request->user()->update([
-            'lodestone_id'          => $request->lodestone_id,
-            'character_name'        => $request->character_name,
-            'character_server'      => $request->character_server,
-            'character_avatar'      => $request->character_avatar,
+            'lodestone_id'          => $id,
+            'character_name'        => $name,
+            'character_server'      => $info['Server'] ?? '—',
+            'character_avatar'      => $info['Avatar'] ?? null,
             'verification_code'     => $code,
             'character_verified_at' => null,
         ]);
 
-        return view('lodestone.verify', ['code' => $code, 'character' => $request->character_name]);
+        return view('lodestone.verify', ['code' => $code, 'character' => $name]);
     }
 
     public function verify(Request $request, XIVApiClient $xivapi, LodestoneClient $lodestone)

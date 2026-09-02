@@ -7,15 +7,16 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [MarketController::class, 'index'])->name('market.dashboard');
-Route::post('/analyze', [MarketController::class, 'analyze'])->name('market.analyze');
+Route::post('/analyze', [MarketController::class, 'analyze'])->middleware('throttle:analyze')->name('market.analyze');
 Route::get('/history', [MarketController::class, 'history'])->name('market.history');
 Route::get('/items', fn() => view('items.index'))->name('items.index');
 Route::get('/craft', fn() => view('craft.index'))->name('craft.index');
-Route::get('/health', fn() => view('health'))->name('health');
 Route::get('/analysis/{analysis}', [MarketController::class, 'showAnalysis'])->name('market.analysis.show');
 Route::get('/analysis/{analysis}/export', [MarketController::class, 'export'])->name('market.analysis.export');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/health', fn() => view('health'))->name('health');
+
     Route::resource('alerts', AlertController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::patch('alerts/{alert}/toggle', [AlertController::class, 'toggle'])->name('alerts.toggle');
 
