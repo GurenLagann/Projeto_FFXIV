@@ -16,7 +16,7 @@ Route::get('/analysis/{analysis}', [MarketController::class, 'showAnalysis'])->n
 Route::get('/analysis/{analysis}/export', [MarketController::class, 'export'])->name('market.analysis.export');
 
 Route::middleware('auth')->group(function () {
-    Route::resource('alerts', AlertController::class)->except('show');
+    Route::resource('alerts', AlertController::class)->only(['index', 'create', 'store', 'destroy']);
     Route::patch('alerts/{alert}/toggle', [AlertController::class, 'toggle'])->name('alerts.toggle');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
