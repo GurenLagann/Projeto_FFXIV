@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Status:** Concluído em 2026-09-01, com host `ffxiv.local` (não `ffmarket`). O Traefik compartilhado real (`/var/www/traefik/traefik.yml`) ganhou entrypoint `websecure`/443 e `providers.file` apontando para `/var/www/traefik/dynamic/`, mantendo `providers.docker` para os labels de cada projeto. Redirect HTTP→HTTPS aplicado só ao router `ffxiv` via middleware nomeado, para não afetar Financas/PM/Portfólio.
+
 **Goal:** Servir `https://ffmarket` com certificado mkcert confiável usando o Traefik compartilhado existente em `/var/www/Traefik/`.
 
 **Architecture:** O Traefik compartilhado já gerencia múltiplos projetos via file provider em `/var/www/Traefik/dynamic/`. Vamos (1) habilitar o entrypoint 443, (2) conectar o Traefik à rede Docker do projeto FFXIV, (3) criar um arquivo de rota dinâmica para `ffmarket`, e (4) remover a exposição direta da porta 8888 do nginx.

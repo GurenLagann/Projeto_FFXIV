@@ -44,7 +44,7 @@ docker compose exec app php artisan migrate
 docker compose exec app php artisan db:seed
 ```
 
-Acesse `http://localhost:8080`.
+Adicione `127.0.0.1 ffxiv.local` ao `/etc/hosts` e acesse `https://ffxiv.local` (servido via Traefik compartilhado; HTTP redireciona automaticamente). Rode `mkcert -install` uma vez na máquina para o navegador confiar no certificado local sem aviso.
 
 ## Sincronização de dados
 
@@ -91,7 +91,7 @@ app/
   Clients/         — UniversalisClient, XIVApiClient
   DTOs/            — ItemPrice, ProfitResult
   Enums/           — Job, CostMetric, RevenueMetric
-  Livewire/        — MarketAnalyzer, ItemBrowser
+  Livewire/        — MarketAnalyzer, ItemBrowser, RecipeBrowser, HealthMonitor
   Models/          — Item, Recipe, RecipeLookup, GatheringItem, Server, Analysis, Alert
   Services/        — MarketAnalyzerService, ProfitCalculator
   Console/Commands/ — market:sync:items, market:sync:gathering, market:analyze, market:alerts:check

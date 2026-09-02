@@ -15,6 +15,40 @@ services:
       - database
       - redis
 
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ffxiv_queue
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan queue:work --tries=3 --sleep=3
+    volumes:
+      - .:/var/www
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - ffxiv
+    depends_on:
+      - database
+      - redis
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ffxiv_scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan schedule:work
+    volumes:
+      - .:/var/www
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - ffxiv
+    depends_on:
+      - database
+      - redis
+
   webserver:
     image: nginx:alpine
     container_name: ffxiv_webserver
@@ -24,8 +58,19 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       - ffxiv
+      - traefik-net
     depends_on:
       - app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ffxiv.rule=Host(`ffxiv.local`)"
+      - "traefik.http.routers.ffxiv.entrypoints=web"
+      - "traefik.http.routers.ffxiv.middlewares=ffxiv-https-redirect"
+      - "traefik.http.middlewares.ffxiv-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.ffxiv-secure.rule=Host(`ffxiv.local`)"
+      - "traefik.http.routers.ffxiv-secure.entrypoints=websecure"
+      - "traefik.http.routers.ffxiv-secure.tls=true"
+      - "traefik.http.services.ffxiv.loadbalancer.server.port=80"
 
   database:
     image: mysql:8.0
@@ -57,6 +102,8 @@ services:
 networks:
   ffxiv:
     driver: bridge
+  traefik-net:
+    external: true
 
 volumes:
   mysql_data:

@@ -1,7 +1,7 @@
 # Traefik + HTTPS Local (ffmarket)
 
 **Data:** 2026-06-04  
-**Status:** Aprovado
+**Status:** Superado — HTTPS foi implementado em 2026-09-01, mas usando o Traefik **compartilhado** externo em `/var/www/traefik` (não um Traefik dedicado ao projeto como este doc propõe) e host `ffxiv.local` (não `ffmarket`). Entrypoint `websecure`/443, provider `file` e cert mkcert em `/var/www/traefik/certs/ffxiv.local.pem`, redirect HTTP→HTTPS escopado só ao router `ffxiv` (para não afetar os outros projetos que compartilham o mesmo Traefik). Ver `docker-compose.yml` deste repo e `/var/www/traefik/` para o estado real.
 
 ## Objetivo
 
