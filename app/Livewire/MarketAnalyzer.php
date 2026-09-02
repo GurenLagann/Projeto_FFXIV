@@ -10,6 +10,7 @@ use App\Services\MarketAnalyzerService;
 use App\Support\MarketFilterDefaults;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class MarketAnalyzer extends Component
@@ -29,7 +30,6 @@ class MarketAnalyzer extends Component
     public string  $analysisMode     = 'craft';
     public ?string $gatheringSource  = null;   // null | 'gathering' | 'fishing'
 
-    public array   $results  = [];
     public bool    $analyzed = false;
     public ?string $error    = null;
 
@@ -143,25 +143,46 @@ class MarketAnalyzer extends Component
                 usort($rawResults, fn($a, $b) => $b->profit <=> $a->profit);
             }
 
-            $this->results      = array_map(fn($r) => $r->jsonSerialize(), $rawResults);
-            $this->totalResults = count($this->results);
+            $serialized = array_map(fn($r) => $r->jsonSerialize(), $rawResults);
+            $this->storeResults($serialized);
+            $this->totalResults = count($serialized);
             $this->analyzed     = true;
             $this->currentPage  = 1;
 
             $service->saveAnalysis($server, $filters, $rawResults, 0);
 
             $this->dispatch('results-updated', [
-                'labels' => array_column(array_slice($this->results, 0, 10), 'itemName'),
-                'data'   => array_column(array_slice($this->results, 0, 10), 'profit'),
+                'labels' => array_column(array_slice($serialized, 0, 10), 'itemName'),
+                'data'   => array_column(array_slice($serialized, 0, 10), 'profit'),
             ]);
         } catch (\Throwable $e) {
             $this->error = $e->getMessage();
         }
     }
 
+    /**
+     * Resultados da análise ficam em cache (não em propriedade pública) para
+     * não inflar o payload Livewire re-serializado a cada interação (sort,
+     * paginação, filtro) — pode chegar a 1000 itens por análise.
+     */
+    private function storeResults(array $results): void
+    {
+        Cache::put($this->resultsCacheKey(), $results, now()->addHour());
+    }
+
+    private function getResults(): array
+    {
+        return Cache::get($this->resultsCacheKey(), []);
+    }
+
+    private function resultsCacheKey(): string
+    {
+        return 'livewire:market-analyzer:' . $this->getId() . ':results';
+    }
+
     public function getPagedResultsProperty(): LengthAwarePaginator
     {
-        $sorted = $this->results;
+        $sorted = $this->getResults();
 
         usort($sorted, function (array $a, array $b) {
             $va = $a[$this->sortColumn] ?? '';
@@ -219,6 +240,7 @@ class MarketAnalyzer extends Component
             'jobs'           => Job::cases(),
             'costMetrics'    => CostMetric::cases(),
             'revMetrics'     => RevenueMetric::cases(),
+            'results'        => $this->getResults(),
             'pagedResults'   => $this->pagedResults,
             'sortColumn'     => $this->sortColumn,
             'sortDirection'  => $this->sortDirection,
