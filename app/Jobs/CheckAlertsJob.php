@@ -45,47 +45,68 @@ class CheckAlertsJob implements ShouldQueue
         $byServer = $alerts->groupBy(fn(Alert $a) => $a->server->slug);
 
         foreach ($byServer as $serverSlug => $serverAlerts) {
-            $itemIds = $serverAlerts->flatMap(function (Alert $alert) {
-                $recipe = $alert->item->recipes->first();
-                if (!$recipe) {
-                    return [$alert->item_id];
-                }
-                return array_merge([$alert->item_id], $recipe->materials->pluck('id')->all());
-            })->unique()->values()->all();
-
-            $prices = $universalis->getPrices($serverSlug, $itemIds);
-
-            foreach ($serverAlerts as $alert) {
-                $recipe = $alert->item->recipes->first();
-                if (!$recipe) {
-                    continue;
-                }
-
-                $finalPrice = $prices[$alert->item_id] ?? null;
-                if (!$finalPrice) {
-                    continue;
-                }
-
-                $materialPrices = [];
-                foreach ($recipe->materials as $material) {
-                    if (isset($prices[$material->id])) {
-                        $materialPrices[$material->id] = $prices[$material->id];
-                    }
-                }
-
-                $result = $calculator->calculate(
-                    $recipe,
-                    $materialPrices,
-                    $finalPrice,
-                    CostMetric::MIN_LISTING,
-                    RevenueMetric::HOME_MIN_LISTING,
-                );
-
-                if ($result->profit >= $alert->min_profit && $result->marginPercent >= $alert->min_margin) {
-                    Mail::to($alert->user)->send(new AlertTriggeredMail($alert, $result));
-                    $alert->update(['last_notified_at' => now()]);
-                }
+            try {
+                $this->checkServerAlerts($serverSlug, $serverAlerts, $universalis, $calculator);
+            } catch (\Throwable $e) {
+                \Log::error('CheckAlertsJob: falha ao verificar alertas do servidor', [
+                    'server' => $serverSlug,
+                    'error'  => $e->getMessage(),
+                ]);
             }
         }
+    }
+
+    private function checkServerAlerts(
+        string $serverSlug,
+        \Illuminate\Support\Collection $serverAlerts,
+        UniversalisClient $universalis,
+        ProfitCalculator $calculator,
+    ): void {
+        $itemIds = $serverAlerts->flatMap(function (Alert $alert) {
+            $recipe = $alert->item->recipes->first();
+            if (!$recipe) {
+                return [$alert->item_id];
+            }
+            return array_merge([$alert->item_id], $recipe->materials->pluck('id')->all());
+        })->unique()->values()->all();
+
+        $prices = $universalis->getPrices($serverSlug, $itemIds);
+
+        foreach ($serverAlerts as $alert) {
+            $recipe = $alert->item->recipes->first();
+            if (!$recipe) {
+                continue;
+            }
+
+            $finalPrice = $prices[$alert->item_id] ?? null;
+            if (!$finalPrice) {
+                continue;
+            }
+
+            $materialPrices = [];
+            foreach ($recipe->materials as $material) {
+                if (isset($prices[$material->id])) {
+                    $materialPrices[$material->id] = $prices[$material->id];
+                }
+            }
+
+            $result = $calculator->calculate(
+                $recipe,
+                $materialPrices,
+                $finalPrice,
+                CostMetric::MIN_LISTING,
+                RevenueMetric::HOME_MIN_LISTING,
+            );
+
+            if ($result->profit >= $alert->min_profit && $result->marginPercent >= $alert->min_margin) {
+                Mail::to($alert->user)->send(new AlertTriggeredMail($alert, $result));
+                $alert->update(['last_notified_at' => now()]);
+            }
+        }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('CheckAlertsJob failed', ['error' => $exception->getMessage()]);
     }
 }

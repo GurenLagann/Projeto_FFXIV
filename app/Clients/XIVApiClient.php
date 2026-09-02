@@ -68,7 +68,8 @@ class XIVApiClient
             $server = urlencode($server);
             $data   = $this->cachedRequest("/character/search?name={$name}&server={$server}");
             return $data['Results'] ?? [];
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('XIVApiClient::searchCharacters failed', ['error' => $e->getMessage()]);
             return null;
         }
     }
@@ -77,7 +78,8 @@ class XIVApiClient
     {
         try {
             return $this->cachedRequest("/character/{$lodestoneId}?data=CJ");
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('XIVApiClient::getCharacter failed', ['lodestoneId' => $lodestoneId, 'error' => $e->getMessage()]);
             return null;
         }
     }
@@ -100,7 +102,8 @@ class XIVApiClient
             $data    = $this->cachedRequest("/recipe?limit=10&filters=ItemResult.ID={$itemId}");
             $results = $data['Results'] ?? [];
             return empty($results) ? null : $results[0];
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('XIVApiClient::getRecipeByItemId failed', ['itemId' => $itemId, 'error' => $e->getMessage()]);
             return null;
         }
     }
@@ -114,7 +117,8 @@ class XIVApiClient
         try {
             $data = $this->cachedRequest("/recipe?limit=10&filters=ItemResult.ID={$itemId}");
             return $data['Results'] ?? [];
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('XIVApiClient::getRecipesByItemId failed', ['itemId' => $itemId, 'error' => $e->getMessage()]);
             return [];
         }
     }
@@ -180,7 +184,8 @@ class XIVApiClient
     {
         try {
             return $this->cachedRequest("/recipe/{$recipeId}");
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('XIVApiClient::getRecipeById failed', ['recipeId' => $recipeId, 'error' => $e->getMessage()]);
             return null;
         }
     }
@@ -194,7 +199,8 @@ class XIVApiClient
                 'total'   => $data['Pagination']['ResultsTotal'] ?? 0,
                 'pages'   => $data['Pagination']['PageTotal'] ?? 1,
             ];
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('XIVApiClient::getAllRecipes failed', ['limit' => $limit, 'page' => $page, 'error' => $e->getMessage()]);
             return ['results' => [], 'total' => 0, 'pages' => 1];
         }
     }

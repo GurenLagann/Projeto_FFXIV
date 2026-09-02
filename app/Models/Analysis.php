@@ -14,6 +14,8 @@ class Analysis extends Model
         'execution_time',
         'total_opportunities',
         'completed_at',
+        'failed_at',
+        'error',
     ];
 
     protected $casts = [
@@ -22,6 +24,7 @@ class Analysis extends Model
         'execution_time'     => 'integer',
         'total_opportunities'=> 'integer',
         'completed_at'       => 'datetime',
+        'failed_at'          => 'datetime',
     ];
 
     public function server(): BelongsTo

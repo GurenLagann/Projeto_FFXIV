@@ -38,4 +38,13 @@ class SyncRecipePageJob implements ShouldQueue
             }
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('SyncRecipePageJob failed', [
+            'page'  => $this->page,
+            'limit' => $this->limit,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

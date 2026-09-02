@@ -35,4 +35,18 @@ class FetchMarketDataJob implements ShouldQueue
             ]);
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('FetchMarketDataJob failed', [
+            'analysisId' => $this->analysisId,
+            'server'     => $this->serverSlug,
+            'error'      => $exception->getMessage(),
+        ]);
+
+        Analysis::find($this->analysisId)?->update([
+            'failed_at' => now(),
+            'error'     => $exception->getMessage(),
+        ]);
+    }
 }

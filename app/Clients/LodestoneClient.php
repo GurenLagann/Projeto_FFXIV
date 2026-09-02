@@ -37,7 +37,11 @@ class LodestoneClient
             if ($response->ok()) {
                 return $response->body();
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('LodestoneClient::fetchPage failed', [
+                'lodestoneId' => $lodestoneId,
+                'error'       => $e->getMessage(),
+            ]);
         }
 
         return null;

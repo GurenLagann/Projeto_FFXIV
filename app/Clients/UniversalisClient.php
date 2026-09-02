@@ -83,8 +83,8 @@ class UniversalisClient
                     Cache::put("univ:item:{$server}:{$itemId}", $itemData, $this->cacheTtl);
                     $results[$itemId] = ItemPrice::fromUniversalisResponse($itemData, (int) $itemId);
                 }
-            } catch (\Throwable) {
-                // skip failed chunk
+            } catch (\Throwable $e) {
+                \Log::warning('UniversalisClient::getPrices chunk failed', ['server' => $server, 'error' => $e->getMessage()]);
             }
         }
 
@@ -108,7 +108,8 @@ class UniversalisClient
 
             Cache::put("univ:item:{$server}:{$itemId}", $data, $this->cacheTtl);
             return ItemPrice::fromUniversalisResponse($data, $itemId);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            \Log::warning('UniversalisClient::getPrice failed', ['server' => $server, 'itemId' => $itemId, 'error' => $e->getMessage()]);
             return null;
         }
     }

@@ -42,4 +42,9 @@ class SyncAlertItemsJob implements ShouldQueue
             }
         }
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Log::error('SyncAlertItemsJob failed', ['error' => $exception->getMessage()]);
+    }
 }
