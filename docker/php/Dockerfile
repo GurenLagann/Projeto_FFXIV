@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     zip \
     unzip \
+    procps \
     libzip-dev \
     libpng-dev \
     libonig-dev \
@@ -25,4 +26,12 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# www-data's passwd entry points $HOME at /var/www (the bind-mounted repo);
+# without this, composer/git write dotfiles (.composer, .gitconfig) straight
+# into the working tree.
+ENV HOME=/tmp
+ENV COMPOSER_HOME=/tmp/composer
+
 WORKDIR /var/www
+
+USER www-data
