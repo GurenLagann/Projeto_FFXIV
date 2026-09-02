@@ -7,6 +7,7 @@ use App\Enums\Job;
 use App\Enums\RevenueMetric;
 use App\Models\Server;
 use App\Services\MarketAnalyzerService;
+use App\Support\MarketFilterDefaults;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -15,11 +16,11 @@ class MarketAnalyzer extends Component
 {
     public ?int   $serverId   = null;
     public ?int   $jobId      = null;
-    public int    $minLevel   = 1;
-    public int    $maxLevel   = 100;
-    public int    $minProfit  = 5000;
-    public float  $minMargin  = 20.0;
-    public float  $minSales        = 5.0;
+    public int    $minLevel   = MarketFilterDefaults::MIN_LEVEL;
+    public int    $maxLevel   = MarketFilterDefaults::MAX_LEVEL;
+    public int    $minProfit  = MarketFilterDefaults::MIN_PROFIT;
+    public float  $minMargin  = MarketFilterDefaults::MIN_MARGIN;
+    public float  $minSales        = MarketFilterDefaults::MIN_SALES;
     public bool   $gatherableOnly  = false;
     public string $costMetric      = 'min_listing';
     public string $revMetric       = 'home_min_listing';

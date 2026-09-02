@@ -4,18 +4,20 @@ namespace App\Console\Commands;
 
 use App\Models\Server;
 use App\Services\MarketAnalyzerService;
+use App\Support\MarketFilterDefaults;
 use Illuminate\Console\Command;
 
 class MarketAnalyzeCommand extends Command
 {
+    // Defaults intentionally omitted here — kept in sync via MarketFilterDefaults in handle().
     protected $signature = 'market:analyze
                             {server? : World server name (e.g. Balmung)}
                             {--job= : Job ID filter (8=CRP, 9=BSM, ...)}
-                            {--min-level=1 : Minimum craft level}
-                            {--max-level=100 : Maximum craft level}
-                            {--min-profit=5000 : Minimum profit in gil}
-                            {--min-margin=20 : Minimum profit margin %}
-                            {--min-sales=10 : Minimum sales per week}
+                            {--min-level= : Minimum craft level}
+                            {--max-level= : Maximum craft level}
+                            {--min-profit= : Minimum profit in gil}
+                            {--min-margin= : Minimum profit margin %}
+                            {--min-sales= : Minimum sales per week}
                             {--top=20 : Number of results to show}
                             {--json : Output as JSON}';
 
@@ -27,11 +29,11 @@ class MarketAnalyzeCommand extends Command
 
         $filters = [
             'job_id'     => $this->option('job') ? (int) $this->option('job') : null,
-            'min_level'  => (int) $this->option('min-level'),
-            'max_level'  => (int) $this->option('max-level'),
-            'min_profit' => (int) $this->option('min-profit'),
-            'min_margin' => (float) $this->option('min-margin'),
-            'min_sales'  => (float) $this->option('min-sales'),
+            'min_level'  => (int) ($this->option('min-level') ?? MarketFilterDefaults::MIN_LEVEL),
+            'max_level'  => (int) ($this->option('max-level') ?? MarketFilterDefaults::MAX_LEVEL),
+            'min_profit' => (int) ($this->option('min-profit') ?? MarketFilterDefaults::MIN_PROFIT),
+            'min_margin' => (float) ($this->option('min-margin') ?? MarketFilterDefaults::MIN_MARGIN),
+            'min_sales'  => (float) ($this->option('min-sales') ?? MarketFilterDefaults::MIN_SALES),
             'limit'      => (int) $this->option('top'),
         ];
 

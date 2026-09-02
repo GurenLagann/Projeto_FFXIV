@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\MarketFilterDefaults;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AnalyzeMarketRequest extends FormRequest
@@ -29,9 +30,9 @@ class AnalyzeMarketRequest extends FormRequest
             'job_id'         => $this->job_id ? (int) $this->job_id : null,
             'min_level'      => $this->min_level ? (int) $this->min_level : null,
             'max_level'      => $this->max_level ? (int) $this->max_level : null,
-            'min_profit'     => (int) ($this->min_profit ?? 0),
-            'min_margin'     => (float) ($this->min_margin ?? 0),
-            'min_sales'      => (float) ($this->min_sales ?? 0),
+            'min_profit'     => (int) ($this->min_profit ?? MarketFilterDefaults::MIN_PROFIT),
+            'min_margin'     => (float) ($this->min_margin ?? MarketFilterDefaults::MIN_MARGIN),
+            'min_sales'      => (float) ($this->min_sales ?? MarketFilterDefaults::MIN_SALES),
         ], fn($v) => $v !== null);
     }
 }
