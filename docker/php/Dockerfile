@@ -26,6 +26,12 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# The bind-mounted repo (and everything composer clones under vendor/) is
+# owned by the host user, not www-data — git's ownership check would
+# otherwise refuse every git operation composer runs (e.g. VCS packages)
+# with "dubious ownership". Single-purpose container, trusted bind mount.
+RUN git config --system --add safe.directory '*'
+
 # www-data's passwd entry points $HOME at /var/www (the bind-mounted repo);
 # without this, composer/git write dotfiles (.composer, .gitconfig) straight
 # into the working tree.
