@@ -49,4 +49,63 @@ class AlertControllerTest extends TestCase
 
         $response->assertMethodNotAllowed();
     }
+
+    public function test_guest_is_redirected_to_login_from_alerts_index(): void
+    {
+        $response = $this->get('/alerts');
+
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_authenticated_user_can_create_an_alert(): void
+    {
+        $user   = User::factory()->create();
+        $item   = Item::create(['id' => 'craft-item', 'name' => 'Craft Item']);
+        $server = Server::create(['name' => 'Balmung', 'slug' => 'balmung', 'datacenter' => 'Crystal', 'region' => 'NA']);
+
+        $response = $this->actingAs($user)->post('/alerts', [
+            'item_id'    => $item->id,
+            'server_id'  => $server->id,
+            'min_profit' => 5000,
+            'min_margin' => 20,
+        ]);
+
+        $response->assertRedirect(route('alerts.index'));
+        $this->assertDatabaseHas('alerts', ['user_id' => $user->id, 'item_id' => $item->id]);
+    }
+
+    public function test_user_cannot_toggle_another_users_alert(): void
+    {
+        $owner  = User::factory()->create();
+        $intruder = User::factory()->create();
+        $alert  = $this->createAlert($owner);
+
+        $response = $this->actingAs($intruder)->patch("/alerts/{$alert->id}/toggle");
+
+        $response->assertForbidden();
+        $this->assertTrue($alert->fresh()->is_active);
+    }
+
+    public function test_user_cannot_delete_another_users_alert(): void
+    {
+        $owner    = User::factory()->create();
+        $intruder = User::factory()->create();
+        $alert    = $this->createAlert($owner);
+
+        $response = $this->actingAs($intruder)->delete("/alerts/{$alert->id}");
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('alerts', ['id' => $alert->id]);
+    }
+
+    public function test_owner_can_delete_their_own_alert(): void
+    {
+        $user  = User::factory()->create();
+        $alert = $this->createAlert($user);
+
+        $response = $this->actingAs($user)->delete("/alerts/{$alert->id}");
+
+        $response->assertRedirect(route('alerts.index'));
+        $this->assertDatabaseMissing('alerts', ['id' => $alert->id]);
+    }
 }
