@@ -9,9 +9,9 @@ namespace App\Support;
  */
 class MarketFilterDefaults
 {
-    public const int MIN_LEVEL  = 1;
-    public const int MAX_LEVEL  = 100;
-    public const int MIN_PROFIT = 5000;
-    public const float MIN_MARGIN = 20.0;
-    public const float MIN_SALES  = 10.0;
+    public const MIN_LEVEL  = 1;
+    public const MAX_LEVEL  = 100;
+    public const MIN_PROFIT = 5000;
+    public const MIN_MARGIN = 20.0;
+    public const MIN_SALES  = 10.0;
 }
